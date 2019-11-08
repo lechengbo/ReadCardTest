@@ -27,10 +27,10 @@ namespace EmguTest
             {
                 var fileName = op.FileName;
                 //Image<Bgr, Byte> img = new Image<Bgr, byte>(op.FileName);
-                var image = Image.FromFile(op.FileName);
+                //var image = Image.FromFile(op.FileName);
+                var bitmap = new Bitmap(fileName);
 
-
-                this.picBox.LoadImage(image);
+                this.picBox.LoadImage(bitmap);
 
             }
         }
@@ -151,9 +151,9 @@ namespace EmguTest
             CommonUse common = new CommonUse();
 
             Rectangle r1 = new Rectangle(1, 1, 200, 200);
-            Rectangle r2 = new Rectangle(2, 2, 4, 4);
+            Rectangle r2 = new Rectangle(2, 2, 190, 190);
 
-            var percent=common.DecideOverlap(r1, r2, out Rectangle maxRect);
+            var percent=common.DecideOverlap(r2, r1, out Rectangle maxRect);
             MessageBox.Show(percent.ToString());
         }
     }

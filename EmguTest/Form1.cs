@@ -129,7 +129,7 @@ namespace EmguTest
 
                 Mat src1 = new Image<Bgr, byte>(ib_original.Image.Bitmap).Mat;
                 Mat src = new Mat();
-
+                
                 CvInvoke.PyrMeanShiftFiltering(src1, src, 25, 10, 1, new MCvTermCriteria(5, 1));
                 commonUse.SaveMat(src, "降噪后");
                 //commonUse.SaveMat(src1, "降噪后原始");
@@ -231,7 +231,7 @@ namespace EmguTest
 
             CommonUse commonUse = new CommonUse();
 
-            var rectList = commonUse.GetRectListFromBitmap(this.ib_middleCut.Image.Bitmap,150,800,0,0,true,2);
+            var rectList = commonUse.GetRectListFromBitmap(this.ib_middleCut.Image.Bitmap,150,2000,0,0,true,2);
 
             //排序
             var rectListDic = commonUse.OrderRectList(rectList);
@@ -454,6 +454,12 @@ namespace EmguTest
             zoom.FormBorderStyle = FormBorderStyle.None;
             zoom.Dock = DockStyle.Fill;
             zoom.Show();
+        }
+
+        private void Btn_openCompareForm_Click(object sender, EventArgs e)
+        {
+            CompareForm form = new CompareForm();
+            form.Show();
         }
     }
 }

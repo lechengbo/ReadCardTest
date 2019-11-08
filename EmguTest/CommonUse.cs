@@ -2,6 +2,7 @@
 using Emgu.CV.Structure;
 using Emgu.CV.UI;
 using Emgu.CV.Util;
+using EmguTest.Service;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -23,11 +24,26 @@ namespace EmguTest
             {
                 Directory.CreateDirectory(directoryPath);
             }
+
             fileName = $"{directoryPath}{DateTime.Now.ToString("yyyyMMddHHmmss_ffff", DateTimeFormatInfo.InvariantInfo)}{fileName}.jpg";
 
             mat.Save(fileName);
 
         }
+        public void DrawRectAndSave(Mat mat, List<Rectangle> rectangles, string fileName)
+        {
+            foreach (var item in rectangles)
+            {
+                CvInvoke.Rectangle(mat, Rectangle.Round(item), new MCvScalar(0, 0, 255));
+
+            }
+            SaveMat(mat, fileName);
+        }
+        /// <summary>
+        /// 获取最大的矩形，重叠和包括，只取最大,过滤长宽比例不协调的矩形，宽高比例不能>4或者0.24
+        /// </summary>
+        /// <param name="pointArray"></param>
+        /// <returns></returns>
         public List<Rectangle> GetRectList(VectorOfVectorOfPoint pointArray)
         {
 
@@ -38,24 +54,30 @@ namespace EmguTest
             {
                 var pointList = pointArray[i];
 
-                var tempPoit = pointList[0];
-                Point leftTop = tempPoit;
-                Point rightBottom = tempPoit;
+                //var tempPoit = pointList[0];
+                //Point leftTop = tempPoit;
+                //Point rightBottom = tempPoit;
 
-                for (int j = 1; j < pointList.Size; j++)
+                //for (int j = 1; j < pointList.Size; j++)
+                //{
+                //    tempPoit = pointList[j];
+                //    leftTop.X = Math.Min(leftTop.X, tempPoit.X);
+                //    leftTop.Y = Math.Min(leftTop.Y, tempPoit.Y);
+
+                //    rightBottom.X = Math.Max(rightBottom.X, tempPoit.X);
+                //    rightBottom.Y = Math.Max(rightBottom.Y, tempPoit.Y);
+                //}
+
+                //var width = rightBottom.X - leftTop.X;// Math.Sqrt(Math.Pow(rightBottom.X - leftTop.X, 2) + Math.Pow(0, 2));
+                //var height = rightBottom.Y - leftTop.Y; //Math.Sqrt(Math.Pow(rightBottom.Y - leftTop.Y, 2) + Math.Pow(0, 2));
+
+                //var tmpRect = new Rectangle(leftTop, new Size((int)width, (int)height));
+                var tmpRect = CvInvoke.BoundingRectangle(pointList);
+                //宽高比例不能>4或者0.24
+                if (tmpRect.Width * 1.0 / tmpRect.Height > 4 || tmpRect.Width * 1.0 / tmpRect.Height < 0.25)
                 {
-                    tempPoit = pointList[j];
-                    leftTop.X = Math.Min(leftTop.X, tempPoit.X);
-                    leftTop.Y = Math.Min(leftTop.Y, tempPoit.Y);
-
-                    rightBottom.X = Math.Max(rightBottom.X, tempPoit.X);
-                    rightBottom.Y = Math.Max(rightBottom.Y, tempPoit.Y);
+                    continue;
                 }
-
-                var width = rightBottom.X - leftTop.X;// Math.Sqrt(Math.Pow(rightBottom.X - leftTop.X, 2) + Math.Pow(0, 2));
-                var height = rightBottom.Y - leftTop.Y; //Math.Sqrt(Math.Pow(rightBottom.Y - leftTop.Y, 2) + Math.Pow(0, 2));
-
-                var tmpRect = new Rectangle(leftTop, new Size((int)width, (int)height));
                 if (!IsOverlapAndReplace(list, tmpRect))
                 {
                     list.Add(tmpRect);//new Rectangle(leftTop.X,leftTop.Y, (int)width,(int)height);
@@ -63,7 +85,7 @@ namespace EmguTest
 
 
             }
-
+            list = RemoveInnerRect(list);
             return list;
         }
 
@@ -76,12 +98,15 @@ namespace EmguTest
             {
                 return false;
             }
+
             for (; startIndex > -1; startIndex--)
             {
                 float tmpPercent = DecideOverlap(sourceList[startIndex], rect, out Rectangle maxRect);
-                if (tmpPercent > 0.3f)
+                isOverlap = isOverlap || tmpPercent > 0.2f;
+                if (isOverlap)
                 {
                     sourceList.RemoveAt(startIndex);
+                    //rect = maxRect;
                     sourceList.Add(maxRect);
                     return true;
                 }
@@ -91,7 +116,42 @@ namespace EmguTest
 
                 }
             }
-            return false;
+            //if (isOverlap)
+            //{
+            //    sourceList.Add(rect);
+            //}
+            return isOverlap;
+        }
+        private List<Rectangle> RemoveInnerRect(List<Rectangle> list)
+        {
+
+            var needRemovedList = new List<Rectangle>();
+            for (int i = 0; i < list.Count; i++)
+            {
+                Rectangle rect1 = list[i];
+                for (int j = 0; j < list.Count; j++)
+                {
+                    Rectangle rect2 = list[j];
+                    if (rect1 == rect2)
+                    {
+                        continue;
+                    }
+
+                    if (rect1.X >= rect2.X && rect1.X + rect1.Width <= rect2.X + rect2.Width
+                        && rect1.Y >= rect2.Y && rect1.Y + rect1.Height <= rect2.Y + rect2.Height)
+                    {
+                        needRemovedList.Add(rect1);
+                    }
+                }
+
+            }
+            needRemovedList.ForEach(r =>
+            {
+                list.Remove(r);
+            });
+
+            return list;
+
         }
 
         public float DecideOverlap(Rectangle r1, Rectangle r2, out Rectangle maxRect)
@@ -147,7 +207,7 @@ namespace EmguTest
         /// <param name="originalStartX">在原始图片中的X起始位置</param>
         /// <param name="originalStartY">在原始图片中的Y起始位置</param>
         /// <returns></returns>
-        public List<Rectangle> GetRectListFromBitmap(Bitmap bitmap, double minArea = 100, double maxArea = 800, int originalStartX = 0, int originalStartY = 0, bool isAutoFillFull = false, int optimizeTimes = 1)
+        public List<Rectangle> GetRectListFromBitmap(Bitmap bitmap, double minArea = 100, double maxArea = 2000, int originalStartX = 0, int originalStartY = 0, bool isAutoFillFull = false, int optimizeTimes = 1)
         {
             List<Rectangle> list;
 
@@ -160,9 +220,20 @@ namespace EmguTest
             Mat matCanny = new Mat();
             Mat matGray = new Mat();
             CvInvoke.CvtColor(mat, matGray, Emgu.CV.CvEnum.ColorConversion.Bgr2Gray);
-            //边缘检测
-            CvInvoke.Canny(matGray, matCanny, 120, 180, 5);
 
+            SaveMat(matGray, "普通灰度图片");
+
+            //二值化
+            Mat mat_threshold = new Mat();
+            int myThreshold = 230;
+            CvInvoke.Threshold(matGray, mat_threshold, myThreshold, 255, Emgu.CV.CvEnum.ThresholdType.Binary);
+            SaveMat(mat_threshold, "二值化");
+            //形态学膨胀
+            //Mat mat_dilate = MyDilate(mat_threshold);
+            //SaveMat(mat_threshold, "形态学膨胀");
+            //边缘检测
+            CvInvoke.Canny(mat_threshold, matCanny, 120, 180, 5);
+            SaveMat(matCanny, "边缘检测");
             //寻找答题卡矩形边界（所有的矩形）
             VectorOfVectorOfPoint contours = new VectorOfVectorOfPoint();//创建VectorOfVectorOfPoint数据类型用于存储轮廓
 
@@ -191,16 +262,27 @@ namespace EmguTest
             foreach (var item in list)
             {
                 var tmpRect = new Rectangle(new Point(originalStartX + item.X, originalStartY + item.Y), item.Size);
-                //宽高比例不能>4或者0.24
-                if (tmpRect.Width * 1.0 / tmpRect.Height > 4 || tmpRect.Width * 1.0 / tmpRect.Height < 0.25)
-                {
-                    continue;
-                }
+
                 originalRectList.Add(tmpRect);
 
 
             }
 
+            //画出去掉重合的矩形框
+            //SaveMat(mat, "原始");
+            DrawRectAndSave(mat, originalRectList, "去掉重合的矩形框");
+            for (int i = 0; i < list.Count; i++)
+            {
+                using (Mat tmpMat = new Mat(mat_threshold, list[i]))
+                {
+
+
+                    var fileName = OCRHelper.Ocr(tmpMat);
+                    fileName = fileName.Replace("\n", "").Replace("\r", "").Replace("\\", "").Replace(" ","").Replace("|","");
+                    SaveMat(tmpMat, "解析后-" + fileName);
+                    Console.WriteLine(fileName);
+                }
+            }
 
             if (isAutoFillFull)
             {
@@ -342,7 +424,7 @@ namespace EmguTest
             double qualifiedWidthPercent = 0.85, qualifiedHeightPercent = 0.85, qualifiedPercent = 0.9;
 
 
-            //优化不合格的矩形
+            //优化不合格的矩形，去掉太小的，去掉太大的
             var unqualifiedRectList = new List<Rectangle>();
             var dic = OrderRectListByRow(sourceList);
             foreach (var key in dic.Keys)
@@ -352,7 +434,8 @@ namespace EmguTest
                 {
                     if (rect.Width < averageWidth * qualifiedWidthPercent ||
                         rect.Height < averageHeight * qualifiedHeightPercent ||
-                        (rect.Width < averageWidth * qualifiedPercent && rect.Height < averageHeight * qualifiedPercent))
+                        (rect.Width < averageWidth * qualifiedPercent && rect.Height < averageHeight * qualifiedPercent) ||
+                        rect.Width > averageWidth * 2 || rect.Height > averageHeight * 2)
                     {
                         unqualifiedRectList.Add(rect);
                         continue;
@@ -386,6 +469,9 @@ namespace EmguTest
             {
                 return sourceList;
             }
+
+            //去掉不合格的矩形
+            sourceList = RemoveUnqualified(sourceList);
 
             //按照行分组,先Y，后X排序
             sourceList = sourceList.OrderBy(r => r.Y).ThenBy(r => r.X).ToList();
@@ -472,7 +558,7 @@ namespace EmguTest
             //计算行之间的间距
             var dicRow = OrderRectListByRow(sourceList);
             var intervalWidthList = new List<double>();
-            
+
             foreach (var item in dicRow.Values)
             {
                 var tempRects = item.OrderBy(r => r.X).ToList();
@@ -534,9 +620,9 @@ namespace EmguTest
         /// <param name="end"></param>
         /// <param name="lenth"></param>
         /// <returns></returns>
-        private double CaculateInterval(int start,int end,double lenth)
+        private double CaculateInterval(int start, int end, double lenth)
         {
-            int count =(int)Math.Floor((end - start+lenth/2) / lenth);
+            int count = (int)Math.Floor((end - start + lenth / 2) / lenth);
 
             double interval = (end - start - lenth * count) * 1.0 / (count - 1);
             return interval;

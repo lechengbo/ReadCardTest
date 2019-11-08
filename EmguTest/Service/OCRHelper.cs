@@ -15,7 +15,7 @@ namespace EmguTest.Service
 {
     public class OCRHelper
     {
-        private static Tesseract tesseract = new Tesseract(Path.Combine(System.Windows.Forms.Application.StartupPath, "tessdata"), "chi_sim", OcrEngineMode.TesseractLstmCombined);
+        private static Tesseract tesseract = new Tesseract(Path.Combine(System.Windows.Forms.Application.StartupPath, "tessdata"), "eng", OcrEngineMode.TesseractLstmCombined);
         public static string Ocr(Bitmap bitmap)
         {
             using (Image<Bgr, byte> bgr = new Image<Bgr, byte>((Bitmap)bitmap.Clone()))
@@ -31,6 +31,12 @@ namespace EmguTest.Service
                 return tesseract.GetUTF8Text();
 
             }
+        }
+        public static string Ocr(Mat mat)
+        {
+            tesseract.SetImage(mat);
+            if (tesseract.Recognize() != 0) return null;
+            return tesseract.GetUTF8Text();
         }
     }
 }

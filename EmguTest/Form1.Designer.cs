@@ -54,6 +54,7 @@ namespace EmguTest
             this.btn_openZoomForm2 = new System.Windows.Forms.Button();
             this.panel1 = new System.Windows.Forms.Panel();
             this.btn_joinForm = new System.Windows.Forms.Button();
+            this.btn_openCompareForm = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.ib_original)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.ib_middle)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.ib_result)).BeginInit();
@@ -307,7 +308,7 @@ namespace EmguTest
             // 
             // btn_joinForm
             // 
-            this.btn_joinForm.Location = new System.Drawing.Point(524, 543);
+            this.btn_joinForm.Location = new System.Drawing.Point(417, 544);
             this.btn_joinForm.Name = "btn_joinForm";
             this.btn_joinForm.Size = new System.Drawing.Size(75, 23);
             this.btn_joinForm.TabIndex = 23;
@@ -315,11 +316,22 @@ namespace EmguTest
             this.btn_joinForm.UseVisualStyleBackColor = true;
             this.btn_joinForm.Click += new System.EventHandler(this.Btn_joinForm_Click);
             // 
+            // btn_openCompareForm
+            // 
+            this.btn_openCompareForm.Location = new System.Drawing.Point(524, 543);
+            this.btn_openCompareForm.Name = "btn_openCompareForm";
+            this.btn_openCompareForm.Size = new System.Drawing.Size(75, 23);
+            this.btn_openCompareForm.TabIndex = 24;
+            this.btn_openCompareForm.Text = "打开对比窗口";
+            this.btn_openCompareForm.UseVisualStyleBackColor = true;
+            this.btn_openCompareForm.Click += new System.EventHandler(this.Btn_openCompareForm_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1727, 835);
+            this.Controls.Add(this.btn_openCompareForm);
             this.Controls.Add(this.btn_joinForm);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.btn_openZoomForm2);
@@ -380,6 +392,7 @@ namespace EmguTest
         private Button btn_openZoomForm2;
         private Panel panel1;
         private Button btn_joinForm;
+        private Button btn_openCompareForm;
     }
 
 

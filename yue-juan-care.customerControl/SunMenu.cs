@@ -211,7 +211,7 @@ namespace yue_juan_care.customerControl
 
             }
             //给 第二级 菜单 点击前后的颜色变化
-            if (this.Level == 2)
+            if (this.Level == 2 || this.Level==3)
             {
                 sunButton.Enter += new EventHandler((object sender, EventArgs e) =>
                 {

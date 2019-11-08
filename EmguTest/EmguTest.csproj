@@ -66,7 +66,19 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ChoseOptionTestForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ChoseOptionTestForm.Designer.cs">
+      <DependentUpon>ChoseOptionTestForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="CommonUse.cs" />
+    <Compile Include="CompareForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CompareForm.Designer.cs">
+      <DependentUpon>CompareForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -89,6 +101,12 @@
     <Compile Include="ZoomForm2.Designer.cs">
       <DependentUpon>ZoomForm2.cs</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="ChoseOptionTestForm.resx">
+      <DependentUpon>ChoseOptionTestForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CompareForm.resx">
+      <DependentUpon>CompareForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
@@ -122,6 +140,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="tessdata\chi_tra.traineddata">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="tessdata\eng.traineddata">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
