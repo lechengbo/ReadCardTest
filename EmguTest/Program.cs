@@ -16,7 +16,7 @@ namespace EmguTest
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new ChoseOptionTestForm());
+            Application.Run(new Form1());
         }
     }
 }

@@ -235,66 +235,67 @@ namespace EmguTest
             CvInvoke.Canny(mat_threshold, matCanny, 120, 180, 5);
             //SaveMat(matCanny, "边缘检测");
             //寻找答题卡矩形边界（所有的矩形）
-            VectorOfVectorOfPoint contours = new VectorOfVectorOfPoint();//创建VectorOfVectorOfPoint数据类型用于存储轮廓
+            using (VectorOfVectorOfPoint contours = new VectorOfVectorOfPoint())//创建VectorOfVectorOfPoint数据类型用于存储轮廓
+            using (VectorOfVectorOfPoint validContours = new VectorOfVectorOfPoint())
+            {//有效的，所有的选项的
 
-            VectorOfVectorOfPoint validContours = new VectorOfVectorOfPoint();//有效的，所有的选项的
+                CvInvoke.FindContours(matCanny, contours, null, Emgu.CV.CvEnum.RetrType.Ccomp,
+                    Emgu.CV.CvEnum.ChainApproxMethod.ChainApproxSimple);//提取轮廓
 
-            CvInvoke.FindContours(matCanny, contours, null, Emgu.CV.CvEnum.RetrType.Ccomp,
-                Emgu.CV.CvEnum.ChainApproxMethod.ChainApproxSimple);//提取轮廓
-
-            //获取符合条件的矩形  闭合矩形的面积>200
-            int size = contours.Size;
-            for (int i = 0; i < size; i++)
-            {
-                var item = contours[i];
-                var tempArea = CvInvoke.ContourArea(item);
-                var tempArc = CvInvoke.ArcLength(item, true);
-                Console.WriteLine($"面积：{tempArea}；周长：{tempArc}"); ;
-                if (tempArea > minArea && tempArea < maxArea)
+                //获取符合条件的矩形  闭合矩形的面积>200
+                int size = contours.Size;
+                for (int i = 0; i < size; i++)
                 {
-                    validContours.Push(item);
+                    var item = contours[i];
+                    var tempArea = CvInvoke.ContourArea(item);
+                    var tempArc = CvInvoke.ArcLength(item, true);
+                    Console.WriteLine($"面积：{tempArea}；周长：{tempArc}"); ;
+                    if (tempArea > minArea && tempArea < maxArea)
+                    {
+                        validContours.Push(item);
+                    }
                 }
+
+                list = GetRectList(validContours);
+                //在原始开始位置上获取矩形列表
+                var originalRectList = new List<Rectangle>();
+                foreach (var item in list)
+                {
+                    var tmpRect = new Rectangle(new Point(originalStartX + item.X, originalStartY + item.Y), item.Size);
+
+                    originalRectList.Add(tmpRect);
+
+
+                }
+
+                //画出去掉重合的矩形框
+                //SaveMat(mat, "原始");
+                //DrawRectAndSave(mat, originalRectList, "去掉重合的矩形框");
+                //for (int i = 0; i < list.Count; i++)
+                //{
+                //    using (Mat tmpMat = new Mat(mat_threshold, list[i]))
+                //    {
+
+
+                //        var fileName = OCRHelper.Ocr(tmpMat);
+                //        fileName = fileName.Replace("\n", "").Replace("\r", "").Replace("\\", "").Replace(" ","").Replace("|","");
+                //        SaveMat(tmpMat, "解析后-" + fileName);
+                //        Console.WriteLine(fileName);
+                //    }
+                //}
+
+                if (isAutoFillFull)
+                {
+                    originalRectList = FillFull(originalRectList);
+                }
+
+                if (optimizeTimes > 0)
+                {
+                    originalRectList = OptimizeRect(originalRectList, optimizeTimes);
+                }
+
+                return originalRectList;
             }
-
-            list = GetRectList(validContours);
-            //在原始开始位置上获取矩形列表
-            var originalRectList = new List<Rectangle>();
-            foreach (var item in list)
-            {
-                var tmpRect = new Rectangle(new Point(originalStartX + item.X, originalStartY + item.Y), item.Size);
-
-                originalRectList.Add(tmpRect);
-
-
-            }
-
-            //画出去掉重合的矩形框
-            //SaveMat(mat, "原始");
-            //DrawRectAndSave(mat, originalRectList, "去掉重合的矩形框");
-            //for (int i = 0; i < list.Count; i++)
-            //{
-            //    using (Mat tmpMat = new Mat(mat_threshold, list[i]))
-            //    {
-
-
-            //        var fileName = OCRHelper.Ocr(tmpMat);
-            //        fileName = fileName.Replace("\n", "").Replace("\r", "").Replace("\\", "").Replace(" ","").Replace("|","");
-            //        SaveMat(tmpMat, "解析后-" + fileName);
-            //        Console.WriteLine(fileName);
-            //    }
-            //}
-
-            if (isAutoFillFull)
-            {
-                originalRectList = FillFull(originalRectList);
-            }
-
-            if (optimizeTimes > 0)
-            {
-                originalRectList = OptimizeRect(originalRectList, optimizeTimes);
-            }
-
-            return originalRectList;
         }
 
         /// <summary>

@@ -461,5 +461,11 @@ namespace EmguTest
             CompareForm form = new CompareForm();
             form.Show();
         }
+
+        private void Btn_loadChosetestForm_Click(object sender, EventArgs e)
+        {
+            ChoseOptionTestForm form = new ChoseOptionTestForm();
+            form.Show();
+        }
     }
 }

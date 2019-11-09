@@ -181,6 +181,13 @@ namespace EmguTest
         {
             //this.histogramBox1
         }
+
+        private void CompareForm_Load_1(object sender, EventArgs e)
+        {
+            this.picSrc1.SetContainer(this.panel1);
+            this.picSrc2.SetContainer(this.panel2);
+
+        }
     }
 
     

@@ -55,6 +55,7 @@ namespace EmguTest
             this.panel1 = new System.Windows.Forms.Panel();
             this.btn_joinForm = new System.Windows.Forms.Button();
             this.btn_openCompareForm = new System.Windows.Forms.Button();
+            this.btn_loadChosetestForm = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.ib_original)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.ib_middle)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.ib_result)).BeginInit();
@@ -320,17 +321,28 @@ namespace EmguTest
             // 
             this.btn_openCompareForm.Location = new System.Drawing.Point(524, 543);
             this.btn_openCompareForm.Name = "btn_openCompareForm";
-            this.btn_openCompareForm.Size = new System.Drawing.Size(75, 23);
+            this.btn_openCompareForm.Size = new System.Drawing.Size(99, 23);
             this.btn_openCompareForm.TabIndex = 24;
             this.btn_openCompareForm.Text = "打开对比窗口";
             this.btn_openCompareForm.UseVisualStyleBackColor = true;
             this.btn_openCompareForm.Click += new System.EventHandler(this.Btn_openCompareForm_Click);
+            // 
+            // btn_loadChosetestForm
+            // 
+            this.btn_loadChosetestForm.Location = new System.Drawing.Point(524, 602);
+            this.btn_loadChosetestForm.Name = "btn_loadChosetestForm";
+            this.btn_loadChosetestForm.Size = new System.Drawing.Size(99, 23);
+            this.btn_loadChosetestForm.TabIndex = 25;
+            this.btn_loadChosetestForm.Text = "打开测试窗口";
+            this.btn_loadChosetestForm.UseVisualStyleBackColor = true;
+            this.btn_loadChosetestForm.Click += new System.EventHandler(this.Btn_loadChosetestForm_Click);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1727, 835);
+            this.Controls.Add(this.btn_loadChosetestForm);
             this.Controls.Add(this.btn_openCompareForm);
             this.Controls.Add(this.btn_joinForm);
             this.Controls.Add(this.panel1);
@@ -393,6 +405,7 @@ namespace EmguTest
         private Panel panel1;
         private Button btn_joinForm;
         private Button btn_openCompareForm;
+        private Button btn_loadChosetestForm;
     }
 
 
