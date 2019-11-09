@@ -17,7 +17,7 @@ namespace EmguTest
 {
     public class CommonUse
     {
-        public void SaveMat(Mat mat, string fileName)
+        public void SaveMat(Mat mat, string fileName,bool needFileExtension=true)
         {
             string directoryPath = Application.StartupPath + "\\upload\\image\\";
             if (!Directory.Exists(directoryPath))
@@ -25,7 +25,7 @@ namespace EmguTest
                 Directory.CreateDirectory(directoryPath);
             }
 
-            fileName = $"{directoryPath}{DateTime.Now.ToString("yyyyMMddHHmmss_ffff", DateTimeFormatInfo.InvariantInfo)}{fileName}.jpg";
+            fileName = $"{directoryPath}{DateTime.Now.ToString("yyyyMMddHHmmss_ffff", DateTimeFormatInfo.InvariantInfo)}{fileName}"+(needFileExtension? ".jpg":"");
 
             mat.Save(fileName);
 
@@ -221,19 +221,19 @@ namespace EmguTest
             Mat matGray = new Mat();
             CvInvoke.CvtColor(mat, matGray, Emgu.CV.CvEnum.ColorConversion.Bgr2Gray);
 
-            SaveMat(matGray, "普通灰度图片");
+            //SaveMat(matGray, "普通灰度图片");
 
             //二值化
             Mat mat_threshold = new Mat();
             int myThreshold = 230;
             CvInvoke.Threshold(matGray, mat_threshold, myThreshold, 255, Emgu.CV.CvEnum.ThresholdType.Binary);
-            SaveMat(mat_threshold, "二值化");
+            //SaveMat(mat_threshold, "二值化");
             //形态学膨胀
             //Mat mat_dilate = MyDilate(mat_threshold);
             //SaveMat(mat_threshold, "形态学膨胀");
             //边缘检测
             CvInvoke.Canny(mat_threshold, matCanny, 120, 180, 5);
-            SaveMat(matCanny, "边缘检测");
+            //SaveMat(matCanny, "边缘检测");
             //寻找答题卡矩形边界（所有的矩形）
             VectorOfVectorOfPoint contours = new VectorOfVectorOfPoint();//创建VectorOfVectorOfPoint数据类型用于存储轮廓
 
@@ -270,19 +270,19 @@ namespace EmguTest
 
             //画出去掉重合的矩形框
             //SaveMat(mat, "原始");
-            DrawRectAndSave(mat, originalRectList, "去掉重合的矩形框");
-            for (int i = 0; i < list.Count; i++)
-            {
-                using (Mat tmpMat = new Mat(mat_threshold, list[i]))
-                {
+            //DrawRectAndSave(mat, originalRectList, "去掉重合的矩形框");
+            //for (int i = 0; i < list.Count; i++)
+            //{
+            //    using (Mat tmpMat = new Mat(mat_threshold, list[i]))
+            //    {
 
 
-                    var fileName = OCRHelper.Ocr(tmpMat);
-                    fileName = fileName.Replace("\n", "").Replace("\r", "").Replace("\\", "").Replace(" ","").Replace("|","");
-                    SaveMat(tmpMat, "解析后-" + fileName);
-                    Console.WriteLine(fileName);
-                }
-            }
+            //        var fileName = OCRHelper.Ocr(tmpMat);
+            //        fileName = fileName.Replace("\n", "").Replace("\r", "").Replace("\\", "").Replace(" ","").Replace("|","");
+            //        SaveMat(tmpMat, "解析后-" + fileName);
+            //        Console.WriteLine(fileName);
+            //    }
+            //}
 
             if (isAutoFillFull)
             {

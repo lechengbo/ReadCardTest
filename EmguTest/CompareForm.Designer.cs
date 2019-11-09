@@ -32,7 +32,7 @@
             // 
             // CompareForm
             // 
-            this.ClientSize = new System.Drawing.Size(694, 532);
+            this.ClientSize = new System.Drawing.Size(974, 680);
             this.Name = "CompareForm";
             this.ResumeLayout(false);
 

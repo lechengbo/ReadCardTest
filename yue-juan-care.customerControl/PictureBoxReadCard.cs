@@ -30,7 +30,7 @@ namespace yue_juan_care.customerControl
         /// <summary>
         /// 矩形框信息
         /// </summary>
-        public RegionInfo RegionInfo { get; set; }
+        public RegionInfo RegionInfo { get; set; } 
         /// <summary>
         /// 当前选中的区域框
         /// </summary>
@@ -46,7 +46,7 @@ namespace yue_juan_care.customerControl
         public void SetContainer(Panel container)
         {
             this.Container = container;
-
+            this.MinWidth = this.Container.Width / 2;
             //this.Container.Controls.Add(this);
         }
 
@@ -65,6 +65,7 @@ namespace yue_juan_care.customerControl
                 X = panelCenterPoint.X - this.Width / 2 + centerPointOffset.X,
                 Y = panelCenterPoint.Y - this.Height / 2 + centerPointOffset.Y
             };
+
         }
 
         /// <summary>
@@ -110,7 +111,7 @@ namespace yue_juan_care.customerControl
             var lastWidth =Math.Max(this.MinWidth, this.Width + step);
             var lastHeight = Convert.ToInt32(Math.Round(this.Height * (lastWidth * 1.0 / this.Width), MidpointRounding.AwayFromZero));
             this.Size = new Size(lastWidth, lastHeight);
-            this.SetCenterInContainer();
+            //this.SetCenterInContainer();
 
 
         }
@@ -145,7 +146,7 @@ namespace yue_juan_care.customerControl
         {
 
             //var g = this.CreateGraphics();
-            if (this.RegionInfo.RectList.Count <= 0)
+            if (this.RegionInfo==null ||this.RegionInfo.RectList.Count <= 0)
             {
                 return;
             }
@@ -268,6 +269,7 @@ namespace yue_juan_care.customerControl
 
         private void PictureBoxReadCard_MouseDown_Draw(object sender, MouseEventArgs e)
         {
+            
             drawStart = e.Location;
             //this.Invalidate();
             blnDraw = true;
@@ -325,6 +327,10 @@ namespace yue_juan_care.customerControl
 
         public Bitmap GetFirstRegionRect() {
             var firstRect = this.RegionInfo.RectList.FirstOrDefault();
+            if (firstRect == null || firstRect.Width==0 || firstRect.Height==0)
+            {
+                return this.orignalBitmap;
+            }
             return Cut(this.orignalBitmap, firstRect.X, firstRect.Y, firstRect.Width, firstRect.Height);
         }
         /// <summary>
