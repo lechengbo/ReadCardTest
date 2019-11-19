@@ -69,6 +69,7 @@ namespace EmguTest
 
         private void Btn_compare_Click(object sender, EventArgs e)
         {
+            var r2 = Similar2(this.picCompare1.Image.Bitmap, this.picCompare2.Image.Bitmap);
             //CvInvoke.im
             //var orignalBitmap = new Bitmap(this.picSrc1.Image);
             //bitmap = bitmap.Clone(new Rectangle(0,0,bitmap.Width,bitmap.Height), bitmap.PixelFormat);
@@ -86,6 +87,25 @@ namespace EmguTest
             //var result = CvInvoke.CompareHist(gray1, gray2, Emgu.CV.CvEnum.HistogramCompMethod.Correl);
             //Compare(source1, source2);
             this.lbl_result.Text = $"相似度：{Similar(ref source1,ref source2)}";
+        }
+        private double Similar2(Bitmap bitmap1,Bitmap bitmap2) {
+            //var fileName = @"C:\Users\Administrator\Pictures\A.png";
+            //bitmap1 = new Bitmap(fileName);
+            //bitmap2= new Bitmap(fileName);
+
+            Mat mat1 = new Image<Gray, byte>(bitmap1).Mat;
+            Mat mat2 = new Image<Gray, byte>(bitmap2).Mat;
+
+            Mat hist1=new Mat(), hist2=new Mat();
+            float[] range = { 10, 50 };
+            int[] channels = new int[] { 0 };
+            int[] histSize = new int[] { 10,10 };
+            bool uniform = true;
+            bool accumulate = false;
+            CvInvoke.CalcHist(mat1,channels , null, hist1,histSize , range, accumulate);
+            CvInvoke.CalcHist(mat1, channels, null, hist2, histSize, range, accumulate);
+
+            return 1;
         }
 
         double Similar(ref Mat src, ref Mat src2)

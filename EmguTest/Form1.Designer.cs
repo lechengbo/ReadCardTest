@@ -56,6 +56,11 @@ namespace EmguTest
             this.btn_joinForm = new System.Windows.Forms.Button();
             this.btn_openCompareForm = new System.Windows.Forms.Button();
             this.btn_loadChosetestForm = new System.Windows.Forms.Button();
+            this.btn_anwserReg = new System.Windows.Forms.Button();
+            this.btn_answerReg = new System.Windows.Forms.Button();
+            this.btn_answerReg3 = new System.Windows.Forms.Button();
+            this.btn_answerReg4 = new System.Windows.Forms.Button();
+            this.btn_openTemplate = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.ib_original)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.ib_middle)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.ib_result)).BeginInit();
@@ -104,11 +109,16 @@ namespace EmguTest
             // num_threshold
             // 
             this.num_threshold.Location = new System.Drawing.Point(33, 493);
+            this.num_threshold.Maximum = new decimal(new int[] {
+            255,
+            0,
+            0,
+            0});
             this.num_threshold.Name = "num_threshold";
             this.num_threshold.Size = new System.Drawing.Size(120, 21);
             this.num_threshold.TabIndex = 4;
             this.num_threshold.Value = new decimal(new int[] {
-            50,
+            190,
             0,
             0,
             0});
@@ -337,11 +347,66 @@ namespace EmguTest
             this.btn_loadChosetestForm.UseVisualStyleBackColor = true;
             this.btn_loadChosetestForm.Click += new System.EventHandler(this.Btn_loadChosetestForm_Click);
             // 
+            // btn_anwserReg
+            // 
+            this.btn_anwserReg.Location = new System.Drawing.Point(203, 669);
+            this.btn_anwserReg.Name = "btn_anwserReg";
+            this.btn_anwserReg.Size = new System.Drawing.Size(75, 23);
+            this.btn_anwserReg.TabIndex = 26;
+            this.btn_anwserReg.Text = "答案卡识别";
+            this.btn_anwserReg.UseVisualStyleBackColor = true;
+            this.btn_anwserReg.Click += new System.EventHandler(this.Btn_anwserReg_Click);
+            // 
+            // btn_answerReg
+            // 
+            this.btn_answerReg.Location = new System.Drawing.Point(203, 700);
+            this.btn_answerReg.Name = "btn_answerReg";
+            this.btn_answerReg.Size = new System.Drawing.Size(88, 23);
+            this.btn_answerReg.TabIndex = 27;
+            this.btn_answerReg.Text = "答案卡识别2";
+            this.btn_answerReg.UseVisualStyleBackColor = true;
+            this.btn_answerReg.Click += new System.EventHandler(this.Btn_answerReg_Click);
+            // 
+            // btn_answerReg3
+            // 
+            this.btn_answerReg3.Location = new System.Drawing.Point(203, 745);
+            this.btn_answerReg3.Name = "btn_answerReg3";
+            this.btn_answerReg3.Size = new System.Drawing.Size(88, 23);
+            this.btn_answerReg3.TabIndex = 28;
+            this.btn_answerReg3.Text = "答案卡识别3";
+            this.btn_answerReg3.UseVisualStyleBackColor = true;
+            this.btn_answerReg3.Click += new System.EventHandler(this.Btn_answerReg3_Click);
+            // 
+            // btn_answerReg4
+            // 
+            this.btn_answerReg4.Location = new System.Drawing.Point(203, 775);
+            this.btn_answerReg4.Name = "btn_answerReg4";
+            this.btn_answerReg4.Size = new System.Drawing.Size(88, 23);
+            this.btn_answerReg4.TabIndex = 29;
+            this.btn_answerReg4.Text = "答案卡识别4";
+            this.btn_answerReg4.UseVisualStyleBackColor = true;
+            this.btn_answerReg4.Click += new System.EventHandler(this.Btn_answerReg4_Click);
+            // 
+            // btn_openTemplate
+            // 
+            this.btn_openTemplate.Location = new System.Drawing.Point(524, 658);
+            this.btn_openTemplate.Name = "btn_openTemplate";
+            this.btn_openTemplate.Size = new System.Drawing.Size(99, 23);
+            this.btn_openTemplate.TabIndex = 30;
+            this.btn_openTemplate.Text = "打开模板定位";
+            this.btn_openTemplate.UseVisualStyleBackColor = true;
+            this.btn_openTemplate.Click += new System.EventHandler(this.Btn_openTemplate_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1727, 835);
+            this.Controls.Add(this.btn_openTemplate);
+            this.Controls.Add(this.btn_answerReg4);
+            this.Controls.Add(this.btn_answerReg3);
+            this.Controls.Add(this.btn_answerReg);
+            this.Controls.Add(this.btn_anwserReg);
             this.Controls.Add(this.btn_loadChosetestForm);
             this.Controls.Add(this.btn_openCompareForm);
             this.Controls.Add(this.btn_joinForm);
@@ -406,6 +471,11 @@ namespace EmguTest
         private Button btn_joinForm;
         private Button btn_openCompareForm;
         private Button btn_loadChosetestForm;
+        private Button btn_anwserReg;
+        private Button btn_answerReg;
+        private Button btn_answerReg3;
+        private Button btn_answerReg4;
+        private Button btn_openTemplate;
     }
 
 

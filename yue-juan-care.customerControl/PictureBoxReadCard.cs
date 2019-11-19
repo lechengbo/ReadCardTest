@@ -304,8 +304,8 @@ namespace yue_juan_care.customerControl
             double heightPercent = currentBitMap.Height * 1.0 / this.Height;
             var destRect = new Rectangle(Convert.ToInt32(rect.X * widthPercent), Convert.ToInt32(rect.Y * heightPercent),
                 Convert.ToInt32(rect.Width * widthPercent), Convert.ToInt32(rect.Height * heightPercent));
-            this.RegionInfo.RectList.Clear();
-            this.RegionInfo.RectList.Add(destRect);
+            //this.RegionInfo.RectList.Clear();
+            this.RegionInfo.RectList.Insert(0,destRect);
 
             
         }
@@ -424,5 +424,7 @@ namespace yue_juan_care.customerControl
 
             return destRectList;
         }
+
+        
     }
 }

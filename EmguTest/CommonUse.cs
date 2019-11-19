@@ -1,4 +1,5 @@
 ﻿using Emgu.CV;
+using Emgu.CV.CvEnum;
 using Emgu.CV.Structure;
 using Emgu.CV.UI;
 using Emgu.CV.Util;
@@ -44,7 +45,7 @@ namespace EmguTest
         /// </summary>
         /// <param name="pointArray"></param>
         /// <returns></returns>
-        public List<Rectangle> GetRectList(VectorOfVectorOfPoint pointArray)
+        public List<Rectangle> GetRectList(VectorOfVectorOfPoint pointArray,bool needFilter=true)
         {
 
 
@@ -74,7 +75,7 @@ namespace EmguTest
                 //var tmpRect = new Rectangle(leftTop, new Size((int)width, (int)height));
                 var tmpRect = CvInvoke.BoundingRectangle(pointList);
                 //宽高比例不能>4或者0.24
-                if (tmpRect.Width * 1.0 / tmpRect.Height > 4 || tmpRect.Width * 1.0 / tmpRect.Height < 0.25)
+                if (needFilter && (tmpRect.Width * 1.0 / tmpRect.Height > 4 || tmpRect.Width * 1.0 / tmpRect.Height < 0.25))
                 {
                     continue;
                 }
@@ -197,7 +198,34 @@ namespace EmguTest
 
             return ratio;
         }
+        /// <summary>
+        /// 获取最大的黑色框（原有的或涂的）
+        /// </summary>
+        /// <param name="bitmap"></param>
+        /// <param name="minArea"></param>
+        /// <param name="maxArea"></param>
+        /// <param name="originalStartX"></param>
+        /// <param name="originalStartY"></param>
+        /// <returns></returns>
+        public Rectangle GetBigRectFromBitmap(Bitmap bitmap, double minArea = 200, double maxArea = 6000, int originalStartX = 0, int originalStartY = 0)
+        {
+            var list = GetRectListFromBitmap(bitmap, minArea, maxArea, originalStartX, originalStartY, false, 0);
+            if (list?.Count == 0)
+            {
+                return Rectangle.Empty;
+            }
+            var bigRect = list[0];
+            for (int i = 1; i < list.Count; i++)
+            {
+                var tmpRect = list[i];
+                if (bigRect.Width*bigRect.Height<tmpRect.Width*tmpRect.Height)
+                {
+                    bigRect = tmpRect;
+                }
+            }
 
+            return bigRect;
+        }
 
         /// <summary>
         /// 获取矩形框从图片中
@@ -207,7 +235,7 @@ namespace EmguTest
         /// <param name="originalStartX">在原始图片中的X起始位置</param>
         /// <param name="originalStartY">在原始图片中的Y起始位置</param>
         /// <returns></returns>
-        public List<Rectangle> GetRectListFromBitmap(Bitmap bitmap, double minArea = 100, double maxArea = 2000, int originalStartX = 0, int originalStartY = 0, bool isAutoFillFull = false, int optimizeTimes = 1)
+        public List<Rectangle> GetRectListFromBitmap(Bitmap bitmap, double minArea = 200, double maxArea = 2000, int originalStartX = 0, int originalStartY = 0, bool isAutoFillFull = false, int optimizeTimes = 1)
         {
             List<Rectangle> list;
 
@@ -221,19 +249,19 @@ namespace EmguTest
             Mat matGray = new Mat();
             CvInvoke.CvtColor(mat, matGray, Emgu.CV.CvEnum.ColorConversion.Bgr2Gray);
 
-            //SaveMat(matGray, "普通灰度图片");
+            SaveMat(matGray, "普通灰度图片");
 
             //二值化
             Mat mat_threshold = new Mat();
             int myThreshold = 230;
             CvInvoke.Threshold(matGray, mat_threshold, myThreshold, 255, Emgu.CV.CvEnum.ThresholdType.Binary);
-            //SaveMat(mat_threshold, "二值化");
+            SaveMat(mat_threshold, "二值化");
             //形态学膨胀
             //Mat mat_dilate = MyDilate(mat_threshold);
             //SaveMat(mat_threshold, "形态学膨胀");
             //边缘检测
             CvInvoke.Canny(mat_threshold, matCanny, 120, 180, 5);
-            //SaveMat(matCanny, "边缘检测");
+            SaveMat(matCanny, "边缘检测");
             //寻找答题卡矩形边界（所有的矩形）
             using (VectorOfVectorOfPoint contours = new VectorOfVectorOfPoint())//创建VectorOfVectorOfPoint数据类型用于存储轮廓
             using (VectorOfVectorOfPoint validContours = new VectorOfVectorOfPoint())
@@ -249,7 +277,7 @@ namespace EmguTest
                     var item = contours[i];
                     var tempArea = CvInvoke.ContourArea(item);
                     var tempArc = CvInvoke.ArcLength(item, true);
-                    Console.WriteLine($"面积：{tempArea}；周长：{tempArc}"); ;
+                    Console.WriteLine($"面积：{tempArea}；周长：{tempArc}");
                     if (tempArea > minArea && tempArea < maxArea)
                     {
                         validContours.Push(item);
@@ -298,6 +326,145 @@ namespace EmguTest
             }
         }
 
+        /// <summary>
+        /// 获取答案中心点
+        /// </summary>
+        /// <param name="bitmap">原图或者，截后的图片</param>
+        /// <param name="minArea">涂的答案最小面价</param>
+        /// <param name="maxArea">涂的答案最大面价</param>
+        /// <returns></returns>
+        public List<Point> GetCenterPointListFromBitmap(Bitmap bitmap, double minArea = 200, double maxArea = 2000) {
+            var pointList = new List<Point>();
+           
+            Mat src = new Image<Bgr, byte>(bitmap).Mat;// new Mat();
+            
+            Mat dst = new Mat();
+            Mat src_gray = new Mat();
+            CvInvoke.CvtColor(src, src_gray, Emgu.CV.CvEnum.ColorConversion.Bgr2Gray);
+            
+            #region 二值化
+            //二值化
+            Mat mat_threshold = new Mat();
+            int myThreshold = 210;
+            CvInvoke.Threshold(src_gray, mat_threshold, myThreshold, 255, Emgu.CV.CvEnum.ThresholdType.BinaryInv);
+           
+            //思路 close -腐蚀-腐蚀-膨胀
+            //形态学膨胀
+            Mat mat_dilate = MyDilate(mat_threshold, Emgu.CV.CvEnum.MorphOp.Close);
+            mat_dilate = MyDilate(mat_dilate, Emgu.CV.CvEnum.MorphOp.Erode);
+            mat_dilate = MyDilate(mat_dilate, Emgu.CV.CvEnum.MorphOp.Erode);
+            mat_dilate = MyDilate(mat_dilate, Emgu.CV.CvEnum.MorphOp.Dilate);
+            #endregion
+
+            //边缘检测
+            CvInvoke.Canny(mat_dilate, dst,120, 180, 5);
+
+            //寻找答题卡矩形边界（所有的矩形）
+            VectorOfVectorOfPoint contours = new VectorOfVectorOfPoint();//创建VectorOfVectorOfPoint数据类型用于存储轮廓
+
+            VectorOfVectorOfPoint validContours = new VectorOfVectorOfPoint();//有效的，所有的选项的
+
+            CvInvoke.FindContours(dst, contours, null, Emgu.CV.CvEnum.RetrType.Ccomp,
+                Emgu.CV.CvEnum.ChainApproxMethod.ChainApproxSimple, new Point(8, 8));//提取轮廓
+
+            //打印所以后矩形面积和周长
+            int size = contours.Size;
+            for (int i = 0; i < size; i++)
+            {
+                var item = contours[i];
+                var tempArea = CvInvoke.ContourArea(item);
+                //var tempArc = CvInvoke.ArcLength(item, true);
+                //Console.WriteLine($"面积：{tempArea}；周长：{tempArc}"); ;
+                if (tempArea > minArea && tempArea < maxArea)
+                {
+                    validContours.Push(item);
+                }
+            }
+            //画出所有轮廓
+            //Mat tmpMat = new Image<Bgr, byte>(bitmap).Mat;
+            //CvInvoke.DrawContours(tmpMat, validContours, -1, new MCvScalar(0, 0, 255), 1);
+            //SaveMat(tmpMat, "所有有效轮廓");
+            //CvInvoke.ApproxPolyDP
+
+
+
+            //画出所有矩形
+            List<Rectangle> rectangles = GetRectList(validContours, false);
+
+            rectangles.ForEach(rect =>
+            {
+                pointList.Add(new Point(rect.X+rect.Width/2, rect.Y+rect.Height/2));
+            });
+
+
+            return pointList;
+
+        }
+
+        /// <summary>
+        /// 获取答案中心点，通过答题卡涂的面积大小来判断
+        /// </summary>
+        /// <param name="bitmap">原图或者，截后的图片</param>
+        /// <param name="rectList">选项卡矩形列表</param>
+        /// <returns></returns>
+        public List<Point> GetCenterPointListFromBitmapByWhiteArea(Bitmap bitmap,List<Rectangle> rectList)
+        {
+            var src = new Image<Gray, byte>(bitmap);
+            var thresholdImage = src.CopyBlank();
+            int myThreshold = 210;
+            CvInvoke.Threshold(src, thresholdImage, myThreshold, 255, Emgu.CV.CvEnum.ThresholdType.BinaryInv);
+            //思路 close -腐蚀-腐蚀-膨胀
+            //形态学膨胀
+            Mat mat_dilate = MyDilate(thresholdImage.Mat, Emgu.CV.CvEnum.MorphOp.Close);
+           
+            mat_dilate = MyDilate(mat_dilate, Emgu.CV.CvEnum.MorphOp.Erode);
+            mat_dilate = MyDilate(mat_dilate, Emgu.CV.CvEnum.MorphOp.Erode);
+            mat_dilate = MyDilate(mat_dilate, Emgu.CV.CvEnum.MorphOp.Dilate);
+            var image_dilate = mat_dilate.ToImage<Gray, byte>();
+
+            List<Rectangle> validRectList = new List<Rectangle>();
+            rectList.ForEach(rect =>
+            {
+                var newRect = new Rectangle(Math.Max(0, rect.X - 8), Math.Max(0, rect.Y - 8), rect.Width, rect.Height);
+                var tmpImage = image_dilate.Copy(newRect);
+
+                var result = GetWhiteColorPercenter(tmpImage);
+                if (result > 0.2)
+                {
+                    validRectList.Add(rect);
+                }
+            });
+
+            List<Point> centerPoint = new List<Point>();
+            validRectList.ForEach(r =>
+            {
+                var tmpPoint = new Point(r.X + r.Width / 2, r.Y + r.Height / 2);
+                centerPoint.Add(tmpPoint);
+            });
+
+            return centerPoint;
+        }
+        private double GetWhiteColorPercenter(Image<Gray, byte> image)
+        {
+
+            int rank = image.Data.GetLength(0);
+            int cols = image.Data.GetLength(1);
+            int whiteColorCount = 0;
+            for (int i = 0; i < rank; i++)
+            {
+                for (int j = 0; j < cols; j++)
+                {
+                    if (image.Data[i, j, 0] == 255)
+                    {
+                        whiteColorCount++;
+                    }
+                }
+            }
+
+            var result = whiteColorCount * 1.0 / image.Data.Length;
+            return result;
+
+        }
         /// <summary>
         /// 把矩形框按照 列或者宽排序
         /// </summary>
@@ -868,14 +1035,14 @@ namespace EmguTest
         /// </summary>
         /// <param name="mat"></param>
         /// <returns></returns>
-        public Mat MyDilate(Mat mat)
+        public Mat MyDilate(Mat mat,MorphOp morphop= MorphOp.Dilate)
         {
             //1.膨胀，改善轮廓
-            Mat struct_element = CvInvoke.GetStructuringElement(Emgu.CV.CvEnum.ElementShape.Cross,
-                new Size(3, 3), new Point(-1, -1));//结构元素
+            Mat struct_element = CvInvoke.GetStructuringElement(Emgu.CV.CvEnum.ElementShape.Rectangle,
+                new Size(5, 5), new Point(2, 2));//结构元素
             Mat mat_dilate = new Mat();
-            CvInvoke.MorphologyEx(mat, mat_dilate, Emgu.CV.CvEnum.MorphOp.Dilate, struct_element, new Point(-1, -1), 1,
-                Emgu.CV.CvEnum.BorderType.Default, new MCvScalar(0, 0, 0));//形态学膨胀
+            CvInvoke.MorphologyEx(mat, mat_dilate, morphop, struct_element, new Point(0, 0), 1,
+                Emgu.CV.CvEnum.BorderType.Default, new MCvScalar(255, 0, 0, 255));//形态学膨胀
 
             return mat_dilate;
         }

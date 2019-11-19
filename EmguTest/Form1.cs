@@ -22,6 +22,7 @@ namespace EmguTest
         Rectangle destRect;//pictureBox中图片的矩形
 
         public static List<Rectangle> OrginalRectList { get; set; }
+        public static List<Rectangle> CutedRectList { get; set; }
 
         private string fileName = "";
         public Form1()
@@ -119,19 +120,182 @@ namespace EmguTest
             picBox.Height = Convert.ToInt32(Math.Round(bitmapHeight / resultPercent, MidpointRounding.AwayFromZero));
         }
 
+        private void Btn_answerReg3_Click(object sender, EventArgs e)
+        {
+            CommonUse commonUse = new CommonUse();
+            var src = new Image<Gray, byte>(ib_middleCut.Image.Bitmap);
+
+            var thresholdImage = src.CopyBlank();
+            int myThreshold = 210;
+            CvInvoke.Threshold(src, thresholdImage, myThreshold, 255, Emgu.CV.CvEnum.ThresholdType.BinaryInv);
+            commonUse.SaveMat(thresholdImage.Mat, "二值化后");
+            //思路 close -腐蚀-腐蚀-膨胀
+            //形态学膨胀
+            Mat mat_dilate = commonUse.MyDilate(thresholdImage.Mat, Emgu.CV.CvEnum.MorphOp.Close);
+            commonUse.SaveMat(mat_dilate, "形态学膨胀");
+            //mat_dilate = commonUse.MyDilate(mat_dilate, Emgu.CV.CvEnum.MorphOp.Close);
+            //commonUse.SaveMat(mat_dilate, "形态学膨胀1");
+            mat_dilate = commonUse.MyDilate(mat_dilate, Emgu.CV.CvEnum.MorphOp.Erode);
+            commonUse.SaveMat(mat_dilate, "形态学膨胀腐蚀1");
+            mat_dilate = commonUse.MyDilate(mat_dilate, Emgu.CV.CvEnum.MorphOp.Erode);
+            commonUse.SaveMat(mat_dilate, "形态学膨胀腐蚀2");
+
+            mat_dilate = commonUse.MyDilate(mat_dilate, Emgu.CV.CvEnum.MorphOp.Dilate);
+            commonUse.SaveMat(mat_dilate, "形态学膨胀2");
+
+            var image_dilate = mat_dilate.ToImage<Gray,byte>();
+
+            List<Rectangle> validRectList = new List<Rectangle>();
+            CutedRectList.ForEach(rect =>
+            {
+                var newRect = new Rectangle(Math.Max(0, rect.X - 8), Math.Max(0,rect.Y - 8), rect.Width,rect.Height);
+                var tmpImage = image_dilate.Copy(newRect);
+                
+                var result = GetWhiteColorPercenter(tmpImage);
+                if ( result > 0.2)
+                {
+                    validRectList.Add(rect);
+                }
+                commonUse.SaveMat(tmpImage.Mat, "形态学后"+result);
+            });
+
+            validRectList.ForEach(r =>
+            {
+                CvInvoke.Rectangle(src, r, new MCvScalar(0, 0, 255));
+            });
+
+            new CommonUse().SaveMat(src.Mat, "通过比例计算获取的答案");
+            this.ib_result.Image = src;
+
+
+        }
+        private double GetWhiteColorPercenter(Image<Gray,byte> image)
+        {
+            Gray c = image[1, 1];
+            int rank = image.Data.GetLength(0);
+            int cols = image.Data.GetLength(1);
+            int whiteColorCount = 0;
+            for (int i = 0; i < rank; i++)
+            {
+                for (int j = 0; j < cols; j++)
+                {
+                    if (image.Data[i, j, 0] == 255)
+                    {
+                        whiteColorCount++;
+                    }
+                }
+            }
+
+            var result= whiteColorCount * 1.0 / image.Data.Length;
+            return result;
+
+        }
+        private void Btn_anwserReg_Click(object sender, EventArgs e)
+        {
+            if (this.ib_middleCut.Image == null)
+            {
+                MessageBox.Show("裁剪图片不能为空");
+                return;
+            }
+
+            CommonUse commonUse = new CommonUse();
+
+            Mat src = new Image<Bgr, byte>(ib_middleCut.Image.Bitmap).Mat;// new Mat();
+
+            //CvInvoke.PyrMeanShiftFiltering(src1, src, 25, 10, 1, new MCvTermCriteria(5, 1));
+            //commonUse.SaveMat(src, "降噪后");
+            //commonUse.SaveMat(src1, "降噪后原始");
+
+            Mat dst = new Mat();
+            Mat src_gray = new Mat();
+            CvInvoke.CvtColor(src, src_gray, Emgu.CV.CvEnum.ColorConversion.Bgr2Gray);
+            //存储灰度图片
+            commonUse.SaveMat(src_gray, "灰度");
+
+            #region 二值化
+            //二值化
+            Mat mat_threshold = new Mat();
+            int myThreshold = Convert.ToInt32(num_threshold.Value);
+            CvInvoke.Threshold(src_gray, mat_threshold, myThreshold, 255, Emgu.CV.CvEnum.ThresholdType.BinaryInv);
+            commonUse.SaveMat(mat_threshold, "二值化");
+            //思路 close -腐蚀-腐蚀-膨胀
+            //形态学膨胀
+            Mat mat_dilate = commonUse.MyDilate(mat_threshold, Emgu.CV.CvEnum.MorphOp.Close);
+            commonUse.SaveMat(mat_dilate, "形态学膨胀");
+            //mat_dilate = commonUse.MyDilate(mat_dilate, Emgu.CV.CvEnum.MorphOp.Close);
+            //commonUse.SaveMat(mat_dilate, "形态学膨胀1");
+            mat_dilate = commonUse.MyDilate(mat_dilate, Emgu.CV.CvEnum.MorphOp.Erode);
+            commonUse.SaveMat(mat_dilate, "形态学膨胀腐蚀1");
+            mat_dilate = commonUse.MyDilate(mat_dilate, Emgu.CV.CvEnum.MorphOp.Erode);
+            commonUse.SaveMat(mat_dilate, "形态学膨胀腐蚀2");
+
+            mat_dilate = commonUse.MyDilate(mat_dilate, Emgu.CV.CvEnum.MorphOp.Dilate);
+            commonUse.SaveMat(mat_dilate, "形态学膨胀2");
+            #endregion
+
+            //边缘检测
+            CvInvoke.Canny(mat_dilate, dst, Convert.ToInt32(this.num_Min.Value), Convert.ToInt32(this.num_Max.Value), Convert.ToInt32(this.num_apertureSize.Value));
+            commonUse.SaveMat(dst, "边缘检测");
+
+            //寻找答题卡矩形边界（所有的矩形）
+            VectorOfVectorOfPoint contours = new VectorOfVectorOfPoint();//创建VectorOfVectorOfPoint数据类型用于存储轮廓
+
+            VectorOfVectorOfPoint validContours = new VectorOfVectorOfPoint();//有效的，所有的选项的
+
+            CvInvoke.FindContours(dst, contours, null, Emgu.CV.CvEnum.RetrType.Ccomp,
+                Emgu.CV.CvEnum.ChainApproxMethod.ChainApproxSimple,new Point(8,8));//提取轮廓
+
+            //打印所以后矩形面积和周长
+            int size = contours.Size;
+            for (int i = 0; i < size; i++)
+            {
+                var item = contours[i];
+                var tempArea = CvInvoke.ContourArea(item);
+                var tempArc = CvInvoke.ArcLength(item, true);
+                Console.WriteLine($"面积：{tempArea}；周长：{tempArc}"); ;
+                if (tempArea > 200 && tempArea < 2000)
+                {
+                    validContours.Push(item);
+                }
+            }
+
+            //CvInvoke.ApproxPolyDP
+
+            //画出所有轮廓
+            Mat middleMat = new Image<Bgr, byte>(this.ib_middleCut.Image.Bitmap).Mat;
+            CvInvoke.DrawContours(middleMat, validContours, -1, new MCvScalar(0, 0, 255), 1);
+            this.ib_result.Image = middleMat;
+            commonUse.SaveMat(middleMat, "画出所有轮廓的");
+
+            //画出所有矩形
+            Mat tmpMat = new Image<Bgr, byte>(this.ib_middleCut.Image.Bitmap).Mat;
+            List<Rectangle> rectangles = commonUse.GetRectList(validContours,false);
+
+            rectangles.ForEach(rect =>
+            {
+                CvInvoke.Rectangle(tmpMat, rect, new MCvScalar(0, 0, 255));
+            });
+
+            commonUse.SaveMat(tmpMat, "画出所有矩形轮廓的");
+
+            this.ib_result.Image = tmpMat;
+            
+
+        }
+
         private void BtStart_Click(object sender, EventArgs e)
         {
             //this.Start();
 
             CommonUse commonUse = new CommonUse();
-            if (ib_original.Image != null)
+            if (this.ib_middleCut.Image != null)
             {
 
-                Mat src1 = new Image<Bgr, byte>(ib_original.Image.Bitmap).Mat;
-                Mat src = new Mat();
+                //Mat src1 = new Image<Bgr, byte>(ib_middleCut.Image.Bitmap).Mat;
+                Mat src = new Image<Bgr, byte>(ib_middleCut.Image.Bitmap).Mat;// new Mat();
                 
-                CvInvoke.PyrMeanShiftFiltering(src1, src, 25, 10, 1, new MCvTermCriteria(5, 1));
-                commonUse.SaveMat(src, "降噪后");
+                //CvInvoke.PyrMeanShiftFiltering(src1, src, 25, 10, 1, new MCvTermCriteria(5, 1));
+                //commonUse.SaveMat(src, "降噪后");
                 //commonUse.SaveMat(src1, "降噪后原始");
 
                 Mat dst = new Mat();
@@ -147,12 +311,16 @@ namespace EmguTest
                 CvInvoke.Threshold(src_gray, mat_threshold, myThreshold, 255, Emgu.CV.CvEnum.ThresholdType.BinaryInv);
                 commonUse.SaveMat(mat_threshold, "二值化");
                 //形态学膨胀
-                Mat mat_dilate = commonUse.MyDilate(mat_threshold);
-                commonUse.SaveMat(mat_threshold, "形态学膨胀");
+                Mat mat_dilate = commonUse.MyDilate(mat_threshold, Emgu.CV.CvEnum.MorphOp.Close);
+                commonUse.SaveMat(mat_dilate, "形态学膨胀");
+                mat_dilate = commonUse.MyDilate(mat_threshold, Emgu.CV.CvEnum.MorphOp.Open);
+                commonUse.SaveMat(mat_dilate, "形态学膨胀1");
+                mat_dilate = commonUse.MyDilate(mat_threshold, Emgu.CV.CvEnum.MorphOp.Erode);
+                commonUse.SaveMat(mat_dilate, "形态学膨胀");
                 #endregion
 
                 //边缘检测
-                CvInvoke.Canny(src_gray, dst, Convert.ToInt32(this.num_Min.Value), Convert.ToInt32(this.num_Max.Value), Convert.ToInt32(this.num_apertureSize.Value));
+                CvInvoke.Canny(mat_dilate, dst, Convert.ToInt32(this.num_Min.Value), Convert.ToInt32(this.num_Max.Value), Convert.ToInt32(this.num_apertureSize.Value));
                 commonUse.SaveMat(dst, "边缘检测");
 
                 //寻找答题卡矩形边界（所有的矩形）
@@ -166,10 +334,12 @@ namespace EmguTest
                 //CvInvoke.ApproxPolyDP
 
                 //画出所有矩形
-                Mat middleMat = new Image<Bgr, byte>(ib_original.Image.Bitmap).Mat;
+                Mat middleMat = new Image<Bgr, byte>(this.ib_middleCut.Image.Bitmap).Mat;
                 CvInvoke.DrawContours(middleMat, contours, -1, new MCvScalar(0, 0, 255), 1);
                 this.ib_result.Image = middleMat;
                 commonUse.SaveMat(middleMat, "画出所有轮廓的");
+
+
                 //获取矩形边界另一种方法
                 //var tempRect=CvInvoke.BoundingRectangle(contours);
                 //CvInvoke.Rectangle(src, tempRect, new MCvScalar(0, 0, 255));
@@ -179,35 +349,35 @@ namespace EmguTest
 
                 //打印所以后矩形面积和周长
                 int size = contours.Size;
-                for (int i = 0; i < size; i++)
-                {
-                    var item = contours[i];
-                    var tempArea = CvInvoke.ContourArea(item);
-                    var tempArc = CvInvoke.ArcLength(item, true);
-                    Console.WriteLine($"面积：{tempArea}；周长：{tempArc}"); ;
-                    if (tempArea > 200 && tempArea<1000)
-                    {
-                        validContours.Push(item);
-                    }
-                }
+                //for (int i = 0; i < size; i++)
+                //{
+                //    var item = contours[i];
+                //    var tempArea = CvInvoke.ContourArea(item);
+                //    var tempArc = CvInvoke.ArcLength(item, true);
+                //    Console.WriteLine($"面积：{tempArea}；周长：{tempArc}"); ;
+                //    if (tempArea > 200 && tempArea<1000)
+                //    {
+                //        validContours.Push(item);
+                //    }
+                //}
 
                 //画出符合要求的所有矩形
                 //CvInvoke.DrawContours(src, validContours, -1, new MCvScalar(0, 0, 255), 1);
 
-                var rectList = commonUse.GetRectList(validContours);
-                foreach (var item in rectList)
-                {
-                    //宽高比例不能>4或者0.24
-                    if (item.Width * 1.0 / item.Height > 4 || item.Width * 1.0 / item.Height < 0.25)
-                    {
-                        continue;
-                    }
-                    CvInvoke.Rectangle(src, item, new MCvScalar(0, 0, 255));
-                }
+                //var rectList = commonUse.GetRectList(validContours);
+                //foreach (var item in rectList)
+                //{
+                //    //宽高比例不能>4或者0.24
+                //    if (item.Width * 1.0 / item.Height > 4 || item.Width * 1.0 / item.Height < 0.25)
+                //    {
+                //        continue;
+                //    }
+                //    CvInvoke.Rectangle(src, item, new MCvScalar(0, 0, 255));
+                //}
 
-                commonUse.SaveMat(src, "带有所有轮廓边界的");
+                //commonUse.SaveMat(src, "带有所有轮廓边界的");
 
-                this.ib_middle.Image = src;
+                //this.ib_middle.Image = src;
 
             }
             else
@@ -231,7 +401,7 @@ namespace EmguTest
 
             CommonUse commonUse = new CommonUse();
 
-            var rectList = commonUse.GetRectListFromBitmap(this.ib_middleCut.Image.Bitmap,150,2000,0,0,true,2);
+            var rectList = commonUse.GetRectListFromBitmap(this.ib_middleCut.Image.Bitmap,150,6000,0,0,true,2);
 
             //排序
             var rectListDic = commonUse.OrderRectList(rectList);
@@ -271,6 +441,7 @@ namespace EmguTest
 
             //
             OrginalRectList = orginalRectList;
+            CutedRectList = rectList;
         }
 
         private void Ib_original_Paint(object sender, PaintEventArgs e)
@@ -466,6 +637,75 @@ namespace EmguTest
         {
             ChoseOptionTestForm form = new ChoseOptionTestForm();
             form.Show();
+        }
+
+        private void Btn_answerReg_Click(object sender, EventArgs e)
+        {
+            if (this.ib_middleCut.Image == null)
+            {
+                MessageBox.Show("裁剪图片不能为空");
+                return;
+            }
+
+            CommonUse commonUse = new CommonUse();
+
+            
+            var centerList = commonUse.GetCenterPointListFromBitmap(this.ib_middleCut.Image.Bitmap);
+            Mat tmpMat = new Image<Bgr, byte>(this.ib_middleCut.Image.Bitmap).Mat;
+            centerList.ForEach(p =>
+            {
+                CvInvoke.Circle(tmpMat, p, 6, new MCvScalar(0,0,255),2);
+            });
+
+            this.ib_result.Image = tmpMat;
+        }
+
+        private void Btn_answerReg4_Click(object sender, EventArgs e)
+        {
+            if (this.ib_middleCut.Image == null)
+            {
+                MessageBox.Show("裁剪图片不能为空");
+                return;
+            }
+           
+            CommonUse commonUse = new CommonUse();
+
+
+            var centerList = commonUse.GetCenterPointListFromBitmapByWhiteArea(this.ib_middleCut.Image.Bitmap,CutedRectList);
+            Mat tmpMat = new Image<Bgr, byte>(this.ib_middleCut.Image.Bitmap).Mat;
+            centerList.ForEach(p =>
+            {
+                CvInvoke.Circle(tmpMat, p, 6, new MCvScalar(0, 0, 255),2);
+            });
+
+            this.ib_result.Image = tmpMat;
+        }
+        private double Similar2(Bitmap bitmap1, Bitmap bitmap2)
+        {
+            //FileStorage
+            //var fileName = @"C:\Users\Administrator\Pictures\A.png";
+            //bitmap1 = new Bitmap(fileName);
+            //bitmap2 = new Bitmap(fileName);
+
+            var mat1 = new Image<Gray, byte>(bitmap1);
+            var mat2 = new Image<Gray, byte>(bitmap2);
+
+            var hist1 = mat1.CopyBlank();var hist2 = mat2.CopyBlank();
+            float[] range = { 0, 256 };
+            int[] channels = new int[] { 0 };
+            int[] histSize = new int[] { 256 };
+            bool uniform = true;
+            bool accumulate = false;
+            CvInvoke.CalcHist(mat1, channels, null, hist1, histSize, range, accumulate);
+            CvInvoke.CalcHist(mat1, channels, null, hist2, histSize, range, accumulate);
+
+            return 1;
+        }
+
+        private void Btn_openTemplate_Click(object sender, EventArgs e)
+        {
+            TemplateValidate templateValidate = new TemplateValidate();
+            templateValidate.Show();
         }
     }
 }

@@ -29,28 +29,30 @@
         private void InitializeComponent()
         {
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.btn_reg = new System.Windows.Forms.Button();
-            this.btn_load = new System.Windows.Forms.Button();
-            this.ib_original = new yue_juan_care.customerControl.PictureBoxReadCard();
-            this.panel1 = new System.Windows.Forms.Panel();
             this.panel2 = new System.Windows.Forms.Panel();
             this.ib_result = new yue_juan_care.customerControl.PictureBoxReadCard();
+            this.panel1 = new System.Windows.Forms.Panel();
+            this.ib_original = new yue_juan_care.customerControl.PictureBoxReadCard();
+            this.btn_reg = new System.Windows.Forms.Button();
+            this.btn_load = new System.Windows.Forms.Button();
             this.minNum = new System.Windows.Forms.NumericUpDown();
             this.maxNum = new System.Windows.Forms.NumericUpDown();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.btn_loadMult = new System.Windows.Forms.Button();
-            this.lbl_picNumInfo = new System.Windows.Forms.Label();
-            this.btn_regMult = new System.Windows.Forms.Button();
-            this.lbl_regResul = new System.Windows.Forms.Label();
-            this.group_Config = new System.Windows.Forms.GroupBox();
             this.button1 = new System.Windows.Forms.Button();
+            this.lbl_regResul = new System.Windows.Forms.Label();
+            this.btn_regMult = new System.Windows.Forms.Button();
+            this.lbl_picNumInfo = new System.Windows.Forms.Label();
+            this.btn_loadMult = new System.Windows.Forms.Button();
+            this.group_Config = new System.Windows.Forms.GroupBox();
+            this.btn_fiexPointReg = new System.Windows.Forms.Button();
+            this.btn_resultShow = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.ib_original)).BeginInit();
-            this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.ib_result)).BeginInit();
+            this.panel1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.ib_original)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.minNum)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.maxNum)).BeginInit();
             this.groupBox2.SuspendLayout();
@@ -59,6 +61,8 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.btn_resultShow);
+            this.groupBox1.Controls.Add(this.btn_fiexPointReg);
             this.groupBox1.Controls.Add(this.panel2);
             this.groupBox1.Controls.Add(this.panel1);
             this.groupBox1.Controls.Add(this.btn_reg);
@@ -69,48 +73,6 @@
             this.groupBox1.TabIndex = 0;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "单张图片自定义选择测试";
-            // 
-            // btn_reg
-            // 
-            this.btn_reg.Location = new System.Drawing.Point(453, 97);
-            this.btn_reg.Name = "btn_reg";
-            this.btn_reg.Size = new System.Drawing.Size(75, 23);
-            this.btn_reg.TabIndex = 3;
-            this.btn_reg.Text = "识别";
-            this.btn_reg.UseVisualStyleBackColor = true;
-            this.btn_reg.Click += new System.EventHandler(this.Btn_reg_Click);
-            // 
-            // btn_load
-            // 
-            this.btn_load.Location = new System.Drawing.Point(453, 38);
-            this.btn_load.Name = "btn_load";
-            this.btn_load.Size = new System.Drawing.Size(75, 23);
-            this.btn_load.TabIndex = 1;
-            this.btn_load.Text = "加载图片";
-            this.btn_load.UseVisualStyleBackColor = true;
-            this.btn_load.Click += new System.EventHandler(this.Btn_load_Click);
-            // 
-            // ib_original
-            // 
-            this.ib_original.CurrentSelectedRect = null;
-            this.ib_original.Location = new System.Drawing.Point(3, 17);
-            this.ib_original.MinWidth = 0;
-            this.ib_original.Name = "ib_original";
-            this.ib_original.RegionInfo = null;
-            this.ib_original.Size = new System.Drawing.Size(422, 320);
-            this.ib_original.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.ib_original.TabIndex = 0;
-            this.ib_original.TabStop = false;
-            // 
-            // panel1
-            // 
-            this.panel1.AutoScroll = true;
-            this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.panel1.Controls.Add(this.ib_original);
-            this.panel1.Location = new System.Drawing.Point(17, 38);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(430, 370);
-            this.panel1.TabIndex = 4;
             // 
             // panel2
             // 
@@ -132,6 +94,48 @@
             this.ib_result.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.ib_result.TabIndex = 0;
             this.ib_result.TabStop = false;
+            // 
+            // panel1
+            // 
+            this.panel1.AutoScroll = true;
+            this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panel1.Controls.Add(this.ib_original);
+            this.panel1.Location = new System.Drawing.Point(17, 38);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(430, 370);
+            this.panel1.TabIndex = 4;
+            // 
+            // ib_original
+            // 
+            this.ib_original.CurrentSelectedRect = null;
+            this.ib_original.Location = new System.Drawing.Point(3, 17);
+            this.ib_original.MinWidth = 0;
+            this.ib_original.Name = "ib_original";
+            this.ib_original.RegionInfo = null;
+            this.ib_original.Size = new System.Drawing.Size(422, 320);
+            this.ib_original.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.ib_original.TabIndex = 0;
+            this.ib_original.TabStop = false;
+            // 
+            // btn_reg
+            // 
+            this.btn_reg.Location = new System.Drawing.Point(453, 97);
+            this.btn_reg.Name = "btn_reg";
+            this.btn_reg.Size = new System.Drawing.Size(75, 23);
+            this.btn_reg.TabIndex = 3;
+            this.btn_reg.Text = "识别";
+            this.btn_reg.UseVisualStyleBackColor = true;
+            this.btn_reg.Click += new System.EventHandler(this.Btn_reg_Click);
+            // 
+            // btn_load
+            // 
+            this.btn_load.Location = new System.Drawing.Point(453, 38);
+            this.btn_load.Name = "btn_load";
+            this.btn_load.Size = new System.Drawing.Size(75, 23);
+            this.btn_load.TabIndex = 1;
+            this.btn_load.Text = "加载图片";
+            this.btn_load.UseVisualStyleBackColor = true;
+            this.btn_load.Click += new System.EventHandler(this.Btn_load_Click);
             // 
             // minNum
             // 
@@ -209,23 +213,23 @@
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "批量处理";
             // 
-            // btn_loadMult
+            // button1
             // 
-            this.btn_loadMult.Location = new System.Drawing.Point(19, 38);
-            this.btn_loadMult.Name = "btn_loadMult";
-            this.btn_loadMult.Size = new System.Drawing.Size(75, 23);
-            this.btn_loadMult.TabIndex = 0;
-            this.btn_loadMult.Text = "批量加载";
-            this.btn_loadMult.UseVisualStyleBackColor = true;
-            this.btn_loadMult.Click += new System.EventHandler(this.Btn_loadMult_Click);
+            this.button1.Location = new System.Drawing.Point(19, 144);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(75, 25);
+            this.button1.TabIndex = 4;
+            this.button1.Text = "打开文件夹";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.Button1_Click);
             // 
-            // lbl_picNumInfo
+            // lbl_regResul
             // 
-            this.lbl_picNumInfo.AutoSize = true;
-            this.lbl_picNumInfo.Location = new System.Drawing.Point(162, 43);
-            this.lbl_picNumInfo.Name = "lbl_picNumInfo";
-            this.lbl_picNumInfo.Size = new System.Drawing.Size(0, 12);
-            this.lbl_picNumInfo.TabIndex = 1;
+            this.lbl_regResul.AutoSize = true;
+            this.lbl_regResul.Location = new System.Drawing.Point(162, 99);
+            this.lbl_regResul.Name = "lbl_regResul";
+            this.lbl_regResul.Size = new System.Drawing.Size(0, 12);
+            this.lbl_regResul.TabIndex = 3;
             // 
             // btn_regMult
             // 
@@ -237,13 +241,23 @@
             this.btn_regMult.UseVisualStyleBackColor = true;
             this.btn_regMult.Click += new System.EventHandler(this.Btn_regMult_Click);
             // 
-            // lbl_regResul
+            // lbl_picNumInfo
             // 
-            this.lbl_regResul.AutoSize = true;
-            this.lbl_regResul.Location = new System.Drawing.Point(162, 99);
-            this.lbl_regResul.Name = "lbl_regResul";
-            this.lbl_regResul.Size = new System.Drawing.Size(0, 12);
-            this.lbl_regResul.TabIndex = 3;
+            this.lbl_picNumInfo.AutoSize = true;
+            this.lbl_picNumInfo.Location = new System.Drawing.Point(162, 43);
+            this.lbl_picNumInfo.Name = "lbl_picNumInfo";
+            this.lbl_picNumInfo.Size = new System.Drawing.Size(0, 12);
+            this.lbl_picNumInfo.TabIndex = 1;
+            // 
+            // btn_loadMult
+            // 
+            this.btn_loadMult.Location = new System.Drawing.Point(19, 38);
+            this.btn_loadMult.Name = "btn_loadMult";
+            this.btn_loadMult.Size = new System.Drawing.Size(75, 23);
+            this.btn_loadMult.TabIndex = 0;
+            this.btn_loadMult.Text = "批量加载";
+            this.btn_loadMult.UseVisualStyleBackColor = true;
+            this.btn_loadMult.Click += new System.EventHandler(this.Btn_loadMult_Click);
             // 
             // group_Config
             // 
@@ -258,15 +272,25 @@
             this.group_Config.TabStop = false;
             this.group_Config.Text = "公共参数设置";
             // 
-            // button1
+            // btn_fiexPointReg
             // 
-            this.button1.Location = new System.Drawing.Point(19, 144);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 25);
-            this.button1.TabIndex = 4;
-            this.button1.Text = "打开文件夹";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.Button1_Click);
+            this.btn_fiexPointReg.Location = new System.Drawing.Point(454, 136);
+            this.btn_fiexPointReg.Name = "btn_fiexPointReg";
+            this.btn_fiexPointReg.Size = new System.Drawing.Size(75, 23);
+            this.btn_fiexPointReg.TabIndex = 6;
+            this.btn_fiexPointReg.Text = "定位点识别";
+            this.btn_fiexPointReg.UseVisualStyleBackColor = true;
+            this.btn_fiexPointReg.Click += new System.EventHandler(this.Btn_fiexPointReg_Click);
+            // 
+            // btn_resultShow
+            // 
+            this.btn_resultShow.Location = new System.Drawing.Point(454, 176);
+            this.btn_resultShow.Name = "btn_resultShow";
+            this.btn_resultShow.Size = new System.Drawing.Size(85, 23);
+            this.btn_resultShow.TabIndex = 7;
+            this.btn_resultShow.Text = "总体结果显示";
+            this.btn_resultShow.UseVisualStyleBackColor = true;
+            this.btn_resultShow.Click += new System.EventHandler(this.Btn_resultShow_Click);
             // 
             // ChoseOptionTestForm
             // 
@@ -280,10 +304,10 @@
             this.Text = "答题卡选项识别测试";
             this.Load += new System.EventHandler(this.ChoseOptionTestForm_Load);
             this.groupBox1.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.ib_original)).EndInit();
-            this.panel1.ResumeLayout(false);
             this.panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.ib_result)).EndInit();
+            this.panel1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.ib_original)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.minNum)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.maxNum)).EndInit();
             this.groupBox2.ResumeLayout(false);
@@ -314,5 +338,7 @@
         private System.Windows.Forms.Button btn_loadMult;
         private System.Windows.Forms.GroupBox group_Config;
         private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button btn_fiexPointReg;
+        private System.Windows.Forms.Button btn_resultShow;
     }
 }

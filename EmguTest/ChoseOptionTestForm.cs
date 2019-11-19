@@ -1,5 +1,6 @@
 ﻿using Emgu.CV;
 using Emgu.CV.Structure;
+using EmguTest.Aggregation;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -16,9 +17,16 @@ namespace EmguTest
 {
     public partial class ChoseOptionTestForm : Form
     {
+
         private string[] multSelectPicPathList;
         private int successNum = 0;
         private int failNum = 0;
+        /// <summary>
+        /// 是否为定位点识别
+        /// </summary>
+        private bool isFixedPointReg = false;
+
+        public Paper Paper { get; set; } = new Paper();
         public ChoseOptionTestForm()
         {
             InitializeComponent();
@@ -36,6 +44,8 @@ namespace EmguTest
                 var bitmap = new Bitmap(fileName);
 
                 this.ib_original.LoadImage(bitmap);
+
+                this.Paper = new Paper();
 
             }
         }
@@ -78,6 +88,70 @@ namespace EmguTest
             commonUse.SaveMat(src, "获取裁剪图中的所有轮廓边界提取");
 
             this.ib_result.Image = src.Bitmap;
+
+            //填充试卷内容
+            if (rectList?.Count == 0)
+            {
+                return;
+            }
+
+            //填充试卷内容
+            var firstRect=  this.ib_original.RegionInfo.RectList.FirstOrDefault();
+            if (!isFixedPointReg)
+            {
+                commonUse.CaculateRectInfo(rectList, out double averageWidth, out double averageHeight, out double intervalWidth, out double intervalHeight);
+                this.Paper.OptionAreaList.Add(new OptionArea() { Area = firstRect, Options = commonUse.OrderRectList(rectList, true, false),WidthInterval=(int)intervalWidth,HeightInterval=(int)intervalHeight });
+
+
+            }
+            else
+            {
+                var fixedPointDetail = rectList.FirstOrDefault();
+                fixedPointDetail.X += firstRect.X;
+                fixedPointDetail.Y += firstRect.Y;
+
+                var fixedType = this.GetFixedType(this.ib_original.orignalBitmap.Width, this.ib_original.orignalBitmap.Height,fixedPointDetail);
+                switch (fixedType)
+                {
+                    case FixedType.LeftTop:
+                        this.Paper.FixedPoint.LeftTop = new FixedPointDetail() { Outer = firstRect,Inner=fixedPointDetail };
+                        break;
+                    case FixedType.RightTop:
+                        this.Paper.FixedPoint.RightTop = new FixedPointDetail() { Outer = firstRect, Inner = fixedPointDetail };
+
+                        break;
+                    case FixedType.LeftBottom:
+                        this.Paper.FixedPoint.LeftBottom = new FixedPointDetail() { Outer = firstRect, Inner = fixedPointDetail };
+
+                        break;
+                    case FixedType.RightBottom:
+                        this.Paper.FixedPoint.RightBottom = new FixedPointDetail() { Outer = firstRect, Inner = fixedPointDetail };
+
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+
+        }
+
+        private FixedType GetFixedType(int originalWidth,int originalHeight,Rectangle point)
+        {
+            if(point.X<originalWidth/2 && point.Y < originalHeight / 2)
+            {
+                return FixedType.LeftTop;
+            }else if (point.X > originalWidth / 2 && point.Y < originalHeight / 2)
+            {
+                return FixedType.RightTop;
+            }else if (point.X < originalWidth / 2 && point.Y > originalHeight / 2)
+            {
+                return FixedType.LeftBottom;
+            }
+            else
+            {
+                return FixedType.RightBottom;
+            }
         }
 
         private void Btn_loadMult_Click(object sender, EventArgs e)
@@ -147,5 +221,28 @@ namespace EmguTest
 
             Process.Start("explorer.exe", directoryPath);
         }
+
+        private void Btn_fiexPointReg_Click(object sender, EventArgs e)
+        {
+            this.isFixedPointReg = true;
+            Btn_reg_Click(sender, e);
+            this.isFixedPointReg = false;
+
+        }
+
+        private void Btn_resultShow_Click(object sender, EventArgs e)
+        {
+            PaperRegResultShowForm form = new PaperRegResultShowForm(this.Paper, (Bitmap)this.ib_original.orignalBitmap.Clone());
+            form.Show();
+        }
+    }
+
+    public  enum FixedType
+    {
+        LeftTop,
+        RightTop,
+        LeftBottom,
+        RightBottom
+        
     }
 }
