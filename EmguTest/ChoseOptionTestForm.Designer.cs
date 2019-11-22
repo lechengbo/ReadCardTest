@@ -29,6 +29,10 @@
         private void InitializeComponent()
         {
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.ckb_isRow = new System.Windows.Forms.CheckBox();
+            this.btn_offset = new System.Windows.Forms.Button();
+            this.btn_resultShow = new System.Windows.Forms.Button();
+            this.btn_fiexPointReg = new System.Windows.Forms.Button();
             this.panel2 = new System.Windows.Forms.Panel();
             this.ib_result = new yue_juan_care.customerControl.PictureBoxReadCard();
             this.panel1 = new System.Windows.Forms.Panel();
@@ -46,8 +50,8 @@
             this.lbl_picNumInfo = new System.Windows.Forms.Label();
             this.btn_loadMult = new System.Windows.Forms.Button();
             this.group_Config = new System.Windows.Forms.GroupBox();
-            this.btn_fiexPointReg = new System.Windows.Forms.Button();
-            this.btn_resultShow = new System.Windows.Forms.Button();
+            this.btn_openHaved = new System.Windows.Forms.Button();
+            this.ckb_save = new System.Windows.Forms.CheckBox();
             this.groupBox1.SuspendLayout();
             this.panel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.ib_result)).BeginInit();
@@ -61,6 +65,10 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.ckb_save);
+            this.groupBox1.Controls.Add(this.btn_openHaved);
+            this.groupBox1.Controls.Add(this.ckb_isRow);
+            this.groupBox1.Controls.Add(this.btn_offset);
             this.groupBox1.Controls.Add(this.btn_resultShow);
             this.groupBox1.Controls.Add(this.btn_fiexPointReg);
             this.groupBox1.Controls.Add(this.panel2);
@@ -69,10 +77,50 @@
             this.groupBox1.Controls.Add(this.btn_load);
             this.groupBox1.Location = new System.Drawing.Point(12, 12);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(590, 811);
+            this.groupBox1.Size = new System.Drawing.Size(610, 811);
             this.groupBox1.TabIndex = 0;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "单张图片自定义选择测试";
+            // 
+            // ckb_isRow
+            // 
+            this.ckb_isRow.AutoSize = true;
+            this.ckb_isRow.Location = new System.Drawing.Point(535, 183);
+            this.ckb_isRow.Name = "ckb_isRow";
+            this.ckb_isRow.Size = new System.Drawing.Size(72, 16);
+            this.ckb_isRow.TabIndex = 9;
+            this.ckb_isRow.Text = "行定位块";
+            this.ckb_isRow.UseVisualStyleBackColor = true;
+            // 
+            // btn_offset
+            // 
+            this.btn_offset.Location = new System.Drawing.Point(453, 177);
+            this.btn_offset.Name = "btn_offset";
+            this.btn_offset.Size = new System.Drawing.Size(75, 23);
+            this.btn_offset.TabIndex = 8;
+            this.btn_offset.Text = "偏移量识别";
+            this.btn_offset.UseVisualStyleBackColor = true;
+            this.btn_offset.Click += new System.EventHandler(this.Btn_offset_Click);
+            // 
+            // btn_resultShow
+            // 
+            this.btn_resultShow.Location = new System.Drawing.Point(454, 244);
+            this.btn_resultShow.Name = "btn_resultShow";
+            this.btn_resultShow.Size = new System.Drawing.Size(85, 23);
+            this.btn_resultShow.TabIndex = 7;
+            this.btn_resultShow.Text = "总体结果显示";
+            this.btn_resultShow.UseVisualStyleBackColor = true;
+            this.btn_resultShow.Click += new System.EventHandler(this.Btn_resultShow_Click);
+            // 
+            // btn_fiexPointReg
+            // 
+            this.btn_fiexPointReg.Location = new System.Drawing.Point(454, 136);
+            this.btn_fiexPointReg.Name = "btn_fiexPointReg";
+            this.btn_fiexPointReg.Size = new System.Drawing.Size(75, 23);
+            this.btn_fiexPointReg.TabIndex = 6;
+            this.btn_fiexPointReg.Text = "定位点识别";
+            this.btn_fiexPointReg.UseVisualStyleBackColor = true;
+            this.btn_fiexPointReg.Click += new System.EventHandler(this.Btn_fiexPointReg_Click);
             // 
             // panel2
             // 
@@ -272,25 +320,25 @@
             this.group_Config.TabStop = false;
             this.group_Config.Text = "公共参数设置";
             // 
-            // btn_fiexPointReg
+            // btn_openHaved
             // 
-            this.btn_fiexPointReg.Location = new System.Drawing.Point(454, 136);
-            this.btn_fiexPointReg.Name = "btn_fiexPointReg";
-            this.btn_fiexPointReg.Size = new System.Drawing.Size(75, 23);
-            this.btn_fiexPointReg.TabIndex = 6;
-            this.btn_fiexPointReg.Text = "定位点识别";
-            this.btn_fiexPointReg.UseVisualStyleBackColor = true;
-            this.btn_fiexPointReg.Click += new System.EventHandler(this.Btn_fiexPointReg_Click);
+            this.btn_openHaved.Location = new System.Drawing.Point(454, 289);
+            this.btn_openHaved.Name = "btn_openHaved";
+            this.btn_openHaved.Size = new System.Drawing.Size(85, 23);
+            this.btn_openHaved.TabIndex = 10;
+            this.btn_openHaved.Text = "打开已有的";
+            this.btn_openHaved.UseVisualStyleBackColor = true;
+            this.btn_openHaved.Click += new System.EventHandler(this.Btn_openHaved_Click);
             // 
-            // btn_resultShow
+            // ckb_save
             // 
-            this.btn_resultShow.Location = new System.Drawing.Point(454, 176);
-            this.btn_resultShow.Name = "btn_resultShow";
-            this.btn_resultShow.Size = new System.Drawing.Size(85, 23);
-            this.btn_resultShow.TabIndex = 7;
-            this.btn_resultShow.Text = "总体结果显示";
-            this.btn_resultShow.UseVisualStyleBackColor = true;
-            this.btn_resultShow.Click += new System.EventHandler(this.Btn_resultShow_Click);
+            this.ckb_save.AutoSize = true;
+            this.ckb_save.Location = new System.Drawing.Point(546, 250);
+            this.ckb_save.Name = "ckb_save";
+            this.ckb_save.Size = new System.Drawing.Size(48, 16);
+            this.ckb_save.TabIndex = 11;
+            this.ckb_save.Text = "保存";
+            this.ckb_save.UseVisualStyleBackColor = true;
             // 
             // ChoseOptionTestForm
             // 
@@ -304,6 +352,7 @@
             this.Text = "答题卡选项识别测试";
             this.Load += new System.EventHandler(this.ChoseOptionTestForm_Load);
             this.groupBox1.ResumeLayout(false);
+            this.groupBox1.PerformLayout();
             this.panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.ib_result)).EndInit();
             this.panel1.ResumeLayout(false);
@@ -340,5 +389,9 @@
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Button btn_fiexPointReg;
         private System.Windows.Forms.Button btn_resultShow;
+        private System.Windows.Forms.Button btn_offset;
+        private System.Windows.Forms.CheckBox ckb_isRow;
+        private System.Windows.Forms.Button btn_openHaved;
+        private System.Windows.Forms.CheckBox ckb_save;
     }
 }

@@ -249,18 +249,18 @@ namespace EmguTest
             Mat matGray = new Mat();
             CvInvoke.CvtColor(mat, matGray, Emgu.CV.CvEnum.ColorConversion.Bgr2Gray);
 
-            SaveMat(matGray, "普通灰度图片");
+            //SaveMat(matGray, "普通灰度图片");
 
             //二值化
             Mat mat_threshold = new Mat();
             int myThreshold = 230;
             CvInvoke.Threshold(matGray, mat_threshold, myThreshold, 255, Emgu.CV.CvEnum.ThresholdType.Binary);
-            SaveMat(mat_threshold, "二值化");
+            //SaveMat(mat_threshold, "二值化");
             //形态学膨胀
             //Mat mat_dilate = MyDilate(mat_threshold);
             //SaveMat(mat_threshold, "形态学膨胀");
             //边缘检测
-            CvInvoke.Canny(mat_threshold, matCanny, 120, 180, 5);
+            CvInvoke.Canny(mat_threshold, matCanny, 60, 180, 5);
             SaveMat(matCanny, "边缘检测");
             //寻找答题卡矩形边界（所有的矩形）
             using (VectorOfVectorOfPoint contours = new VectorOfVectorOfPoint())//创建VectorOfVectorOfPoint数据类型用于存储轮廓
@@ -1357,6 +1357,24 @@ namespace EmguTest
             Array.Sort(dst);//数组排序
             int maxValue = dst[arr.Length - 1];//数组最大值
             return maxValue;
+        }
+
+        public static Rectangle MoveRect(Rectangle originalRect,int offsetX,int offsetY)
+        {
+            
+            return new Rectangle(new Point(Math.Max(0, originalRect.X + offsetX), Math.Max(0, originalRect.Y + offsetY)), originalRect.Size);
+           
+        }
+        public static List<Rectangle> MoveRects(List<Rectangle> originalRectList,int offsetX,int offsetY)
+        {
+            var tmpList = new List<Rectangle>();
+
+            originalRectList.ForEach(r =>
+            {
+                tmpList.Add(MoveRect(r, offsetX, offsetY));
+            });
+
+            return tmpList;
         }
     }
 }

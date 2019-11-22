@@ -376,6 +376,10 @@ namespace yue_juan_care.customerControl
             }
         }
 
+        public static Bitmap Cut(Bitmap b,Rectangle rect)
+        {
+            return Cut(b, rect.X, rect.Y, rect.Width, rect.Height);
+        }
 
 
     }

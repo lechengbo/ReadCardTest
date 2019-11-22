@@ -62,6 +62,18 @@ namespace EmguTest
                 }
 
             });
+
+            //画偏移点区域
+            paper.OffsetAreas.ForEach(o =>
+            {
+                CvInvoke.Rectangle(mat, o.Area, new MCvScalar(0, 0, 255));
+                o.OffsetList.ForEach(item =>
+                {
+                    var tmpRect = new Rectangle(new Point(o.Area.X + item.X, o.Area.Y + item.Y), item.Size);
+                    CvInvoke.Rectangle(mat, tmpRect, new MCvScalar(0, 0, 255));
+
+                });
+            });
         }
 
         private void PaperRegResultShowForm_Load(object sender, EventArgs e)

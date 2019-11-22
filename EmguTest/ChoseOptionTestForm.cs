@@ -1,6 +1,7 @@
 ﻿using Emgu.CV;
 using Emgu.CV.Structure;
 using EmguTest.Aggregation;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -45,7 +46,7 @@ namespace EmguTest
 
                 this.ib_original.LoadImage(bitmap);
 
-                this.Paper = new Paper();
+                this.Paper = new Paper() { TemplatePath=fileName};
 
             }
         }
@@ -232,8 +233,94 @@ namespace EmguTest
 
         private void Btn_resultShow_Click(object sender, EventArgs e)
         {
+            //先保存
+            if (this.ckb_save.Checked)
+            {
+                this.SavePaper();
+            }
             PaperRegResultShowForm form = new PaperRegResultShowForm(this.Paper, (Bitmap)this.ib_original.orignalBitmap.Clone());
             form.Show();
+        }
+
+        private void SavePaper()
+        {
+            string paperJson = JsonConvert.SerializeObject(this.Paper);
+
+            string directoryPath = Application.StartupPath + "\\PaperJson\\";
+            if (!Directory.Exists(directoryPath))
+            {
+                Directory.CreateDirectory(directoryPath);
+            }
+
+            var fileName = $"{directoryPath}{Path.GetFileNameWithoutExtension(this.Paper.TemplatePath)}.json";
+            File.WriteAllText(fileName, paperJson);
+
+        }
+
+        private void Btn_offset_Click(object sender, EventArgs e)
+        {
+            if (ib_original.Image == null)
+            {
+                MessageBox.Show("请先加载图片");
+                return;
+            }
+
+            var cutedBitmap = this.ib_original.GetFirstRegionRect();
+
+            if (cutedBitmap == null)
+            {
+                MessageBox.Show("将要识别的图片不能为空");
+                return;
+            }
+
+            CommonUse commonUse = new CommonUse();
+
+            var rectList = commonUse.GetRectListFromBitmap(cutedBitmap, Convert.ToInt32(this.minNum.Value), Convert.ToInt32(this.maxNum.Value), 0, 0, false, 0);
+
+            //排序
+            //var rectListDic = commonUse.OrderRectList(rectList);
+
+            Mat src = new Image<Bgr, byte>(cutedBitmap).Mat;
+
+            foreach (var item in rectList)
+            {
+                CvInvoke.Rectangle(src, item, new MCvScalar(0, 0, 255));
+            }
+
+            commonUse.SaveMat(src, "偏移量测试定位点");
+
+            this.ib_result.Image = src.Bitmap;
+
+           
+            if (rectList?.Count == 0)
+            {
+                return;
+            }
+
+            this.Paper.OffsetAreas.Add(new OffsetArea(this.ib_original.RegionInfo.RectList.FirstOrDefault(), rectList,this.ckb_isRow.Checked? OffsetType.Rows: OffsetType.Column));
+
+        }
+
+        private void Btn_openHaved_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog op = new OpenFileDialog();
+            op.Filter = "所有Json文件|*.json"; ;
+            if (op.ShowDialog() == DialogResult.OK)
+            {
+                var fileName = op.FileName;
+
+                var paperJson = File.ReadAllText(fileName);
+                this.Paper = JsonConvert.DeserializeObject<Paper>(paperJson);
+                //Image<Bgr, Byte> img = new Image<Bgr, byte>(op.FileName);
+                //var image = Image.FromFile(op.FileName);
+                var bitmap = new Bitmap(this.Paper.TemplatePath);
+
+                this.ib_original.LoadImage(bitmap);
+
+                this.ib_original.RegionInfo.RectList.AddRange(this.Paper.GetAllRects());
+                
+
+            }
         }
     }
 

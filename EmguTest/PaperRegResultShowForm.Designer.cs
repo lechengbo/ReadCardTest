@@ -37,6 +37,7 @@
             // 
             // panel1
             // 
+            this.panel1.AutoScroll = true;
             this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.panel1.Controls.Add(this.picSrc);
             this.panel1.Location = new System.Drawing.Point(13, 13);
@@ -47,7 +48,6 @@
             // picSrc
             // 
             this.picSrc.CurrentSelectedRect = null;
-            this.picSrc.Dock = System.Windows.Forms.DockStyle.Fill;
             this.picSrc.Location = new System.Drawing.Point(0, 0);
             this.picSrc.MinWidth = 0;
             this.picSrc.Name = "picSrc";
