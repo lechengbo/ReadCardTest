@@ -40,7 +40,7 @@ namespace yue_juan_care.customerControl
             this.panelContainer.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelContainer.Location = new System.Drawing.Point(0, 0);
             this.panelContainer.Name = "panelContainer";
-            this.panelContainer.Size = new System.Drawing.Size(235, 708);
+            this.panelContainer.Size = new System.Drawing.Size(250, 708);
             this.panelContainer.TabIndex = 0;
             this.panelContainer.Scroll += new System.Windows.Forms.ScrollEventHandler(this.PanelContainer_Scroll);
             // 
@@ -51,7 +51,9 @@ namespace yue_juan_care.customerControl
             this.AutoScroll = true;
             this.Controls.Add(this.panelContainer);
             this.Name = "SunMenuCtrl";
-            this.Size = new System.Drawing.Size(235, 708);
+            this.Size = new System.Drawing.Size(250, 708);
+            this.Paint += new System.Windows.Forms.PaintEventHandler(this.SunMenuCtrl_Paint);
+            this.Layout += new System.Windows.Forms.LayoutEventHandler(this.SunMenuCtrl_Layout);
             this.ResumeLayout(false);
 
         }

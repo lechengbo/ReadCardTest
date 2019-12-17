@@ -43,6 +43,11 @@ namespace yue_juan_care.customerControl
         /// <param name="e"></param>
         public Action<ClickType, object> ClickHandler;
 
+
+        public SunButton TitleButton { get; private set; }
+
+        public FlowLayoutPanel ControllPanel { get; set; }
+
         public SunMenu(string title)
         {
             if (string.IsNullOrEmpty(title))
@@ -61,6 +66,7 @@ namespace yue_juan_care.customerControl
         public void AddChild(SunMenu menu, int childLevel = 1)
         {
             menu.Level = this.Level + childLevel;
+            menu.Expand = menu.Expand && this.Expand;
             this.Children.Add(menu);
             menu.Parent = this;
         }
@@ -68,8 +74,13 @@ namespace yue_juan_care.customerControl
         public FlowLayoutPanel CreatePanel(int index = 0)
         {
             var panel = new FlowLayoutPanel();
+            //panel.SuspendLayout();
 
-            panel.AutoSize = true;
+            panel.AutoSize = this.level==3?false: true;
+            if (!panel.AutoSize)
+            {
+                panel.Size = new Size(width, height);
+            }
             panel.BorderStyle = System.Windows.Forms.BorderStyle.None;
             panel.Margin = new System.Windows.Forms.Padding(0);
             panel.Name = MenuHelper.CreateName("panel");
@@ -77,21 +88,43 @@ namespace yue_juan_care.customerControl
             panel.Padding = new Padding(0);
             panel.Margin = new Padding(0);
             //添加button
-            panel.Controls.Add(this.CreateSunButton());
+            this.TitleButton = this.CreateSunButton();
+            panel.Controls.Add(this.TitleButton);
             //添加功能型button
             foreach (var item in this.OperateButtonList)
             {
-                panel.Controls.Add(this.CreateOperateButton(item));
+                var button = this.CreateOperateButton(item);
+                panel.Controls.Add(button);
             }
 
             //添加子panel
+            //添加子panel 父级
+            FlowLayoutPanel middlePanel=null;
+            if (this.Children?.Count > 0)
+            {
+                middlePanel = new FlowLayoutPanel();
+                middlePanel.AutoSize = true;
+                middlePanel.BorderStyle = System.Windows.Forms.BorderStyle.None;
+                middlePanel.Margin = new System.Windows.Forms.Padding(0);
+                //middlePanel.Name = MenuHelper.CreateName("panel");
+                //middlePanel.TabIndex = index;
+                middlePanel.Padding = new Padding(0);
+                middlePanel.Margin = new Padding(0);
+                middlePanel.Visible = this.Expand;
+                //控制的panel
+                this.ControllPanel = middlePanel;
+                panel.Controls.Add(middlePanel);
+            }
             for (int i = 0; i < this.Children.Count; i++)
             {
                 var lowerPanel = this.Children[i].CreatePanel(i);
-                lowerPanel.Visible = this.Expand;
-                panel.Controls.Add(lowerPanel);
+                //lowerPanel.Visible = this.Expand;
+                middlePanel.Controls.Add(lowerPanel);
+                
             }
 
+            //panel.ResumeLayout(false);
+            //panel.PerformLayout();
             return panel;
         }
 
@@ -102,18 +135,18 @@ namespace yue_juan_care.customerControl
 
             var fontStyle = FontStyle.Regular;
 
-            SunButton sunButton = new SunButton() { IsExpand = this.Expand, SunMenu = this };
+            SunButton sunButton = new SunButton() {   };
 
             switch (this.Level)
             {
                 case 1:
-                    sunButton.Image = sunButton.IsExpand ? Properties.Resources.up : Properties.Resources.down;
+                    sunButton.Image = this.Expand ? Properties.Resources.up : Properties.Resources.down;
                     sunButton.BackgroundImage = Properties.Resources.backFull2x;
                     fontStyle = System.Drawing.FontStyle.Bold;
                     break;
                 case 2:
                     fontSize = 9F;
-                    sunButton.Image = sunButton.IsExpand ? Properties.Resources.upFull : Properties.Resources.downFull;
+                    sunButton.Image = this.Expand ? Properties.Resources.upFull : Properties.Resources.downFull;
                     //sunButton.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(51)))), ((int)(((byte)(51)))), ((int)(((byte)(51)))));
                     break;
                 case 3:
@@ -152,44 +185,36 @@ namespace yue_juan_care.customerControl
             sunButton.Click += new System.EventHandler((object sender, EventArgs e) =>
             {
                 var button = (SunButton)sender;
-                button.SunMenu.Expand = button.IsExpand = !button.IsExpand;
+                var currentExpend = this.Expand;
+                this.Toggle(!currentExpend);
 
                 //显示或者隐藏
-                switch (button.SunMenu.Level)
-                {
-                    case 1:
-                    case 2:
-                        var tmpParent = button.Parent;
-                        if (tmpParent.Parent == null)
-                        {
-                            return;
-                        }
-                        foreach (var item in tmpParent.Controls)
-                        {
-                            if (item is FlowLayoutPanel)
-                            {
-                                var tmpPanel = ((FlowLayoutPanel)item);
-                                tmpPanel.Visible = !tmpPanel.Visible;
-                            }
-                        }
-                        break;
-                    default:
-                        break;
-                }
+                //switch (button.SunMenu.Level)
+                //{
+                //    case 1:
+                //    case 2:
+                //        var tmpParent = button.Parent;
+                //        if (tmpParent.Parent == null)
+                //        {
+                //            return;
+                //        }
+                //        foreach (var item in tmpParent.Controls)
+                //        {
+                //            if (item is FlowLayoutPanel)
+                //            {
+                //                var tmpPanel = ((FlowLayoutPanel)item);
+                //                tmpPanel.Visible = !tmpPanel.Visible;
+                               
+                //            }
+                //        }
+                        
+                //        break;
+                //    default:
+                //        break;
+                //}
 
                 //改变图标
-                switch (button.SunMenu.Level)
-                {
-                    case 1:
-                        button.Image = button.IsExpand ? Properties.Resources.up : Properties.Resources.down;
-                        break;
-                    case 2:
-                        button.Image = button.IsExpand ? Properties.Resources.upFull : Properties.Resources.downFull;
-                        break;
-                    default:
-                        break;
-
-                }
+               
 
                 //针对 菜单的点击事件
                 this.ClickHandler?.Invoke(ClickType.Title, this.Param);
@@ -203,7 +228,7 @@ namespace yue_juan_care.customerControl
                 {
                     var button = (SunButton)sender;
                     //Console.WriteLine(button.Width);
-                    int marginRight = width - 4 - button.Width - button.Margin.Left - button.Padding.Left - button.SunMenu.OperateButtonList.Count * 40;
+                    int marginRight = width - 4 - button.Width - button.Margin.Left - button.Padding.Left - this.OperateButtonList.Count * 40;
                     var tmpMargin = button.Margin;
                     tmpMargin.Right = Math.Max(0, marginRight);
                     button.Margin = tmpMargin;
@@ -211,20 +236,20 @@ namespace yue_juan_care.customerControl
 
             }
             //给 第二级 菜单 点击前后的颜色变化
-            if (this.Level == 2 || this.Level==3)
-            {
-                sunButton.Enter += new EventHandler((object sender, EventArgs e) =>
-                {
-                    var button = (SunButton)sender;
-                    button.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(44)))), ((int)(((byte)(188)))), ((int)(((byte)(135)))));
+            //if (this.Level == 2 || this.Level==3)
+            //{
+            //    sunButton.Enter += new EventHandler((object sender, EventArgs e) =>
+            //    {
+            //        var button = (SunButton)sender;
+            //        button.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(44)))), ((int)(((byte)(188)))), ((int)(((byte)(135)))));
 
-                });
-                sunButton.Leave += new EventHandler((object sender, EventArgs e) =>
-                {
-                    var button = (SunButton)sender;
-                    button.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(51)))), ((int)(((byte)(51)))), ((int)(((byte)(51)))));
-                });
-            }
+            //    });
+            //    sunButton.Leave += new EventHandler((object sender, EventArgs e) =>
+            //    {
+            //        var button = (SunButton)sender;
+            //        button.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(51)))), ((int)(((byte)(51)))), ((int)(((byte)(51)))));
+            //    });
+            //}
 
             return sunButton;
         }
@@ -236,7 +261,7 @@ namespace yue_juan_care.customerControl
 
             var fontStyle = FontStyle.Regular;
 
-            SunButton sunButton = new SunButton() { IsExpand = this.Expand, SunMenu = this };
+            SunButton sunButton = new SunButton() {  };
             sunButton.AutoSize = true;
             sunButton.Cursor = System.Windows.Forms.Cursors.Hand;
             sunButton.FlatAppearance.BorderSize = 0;
@@ -257,6 +282,9 @@ namespace yue_juan_care.customerControl
                 case ClickType.Ignore:
                     sunButton.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(191)))), ((int)(((byte)(102)))));
                     break;
+                case ClickType.AbsentMark:
+                    sunButton.ForeColor = System.Drawing.ColorTranslator.FromHtml("#4B9AFF");
+                    break;
                 default:
                     sunButton.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(102)))), ((int)(((byte)(102)))));
                     break;
@@ -271,6 +299,51 @@ namespace yue_juan_care.customerControl
 
             });
             return sunButton;
+        }
+
+        public void Toggle( bool isExpand)
+        {
+            if (this.ControllPanel == null)
+            {
+                return;
+            }
+
+            this.Expand = isExpand;
+            this.ControllPanel.Visible = this.Expand;
+
+            if (this.Level==1 && this.Expand)
+            {
+                //this.CloseBrother();
+            }
+            //改变图标
+            
+            switch (this.Level)
+            {
+                case 1:
+                    this.TitleButton.Image = this.Expand ? Properties.Resources.up : Properties.Resources.down;
+                    break;
+                case 2:
+                    this.TitleButton.Image = this.Expand ? Properties.Resources.upFull : Properties.Resources.downFull;
+                    break;
+                default:
+                    break;
+
+            }
+        }
+        public void CloseChild()
+        {
+            this.Children?.ForEach(c => c.Toggle(false));
+        }
+
+        public void CloseBrother()
+        {
+            this?.Parent.Children.ForEach(b =>
+            {
+                if (b != this)
+                {
+                    b.Toggle(false);
+                }
+            });
         }
 
     }
@@ -296,7 +369,11 @@ namespace yue_juan_care.customerControl
                 case ClickType.Ignore:
                     name = "忽略";
                     break;
+                case ClickType.AbsentMark:
+                    name = "缺考";
+                    break;
                 default:
+                    name=clickType.ToString();
                     break;
             }
 

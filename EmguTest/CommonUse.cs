@@ -1,8 +1,10 @@
 ﻿using Emgu.CV;
 using Emgu.CV.CvEnum;
+using Emgu.CV.Features2D;
 using Emgu.CV.Structure;
 using Emgu.CV.UI;
 using Emgu.CV.Util;
+using EmguTest.Properties;
 using EmguTest.Service;
 using System;
 using System.Collections.Generic;
@@ -18,34 +20,60 @@ namespace EmguTest
 {
     public class CommonUse
     {
-        public void SaveMat(Mat mat, string fileName,bool needFileExtension=true)
+        private Mat leftMat = new Image<Gray, byte>(Resources.left).Mat;
+        private Mat rightMat = new Image<Gray, byte>(Resources.right).Mat;
+        private Mat leftMatSmall = new Image<Gray, byte>(Resources.leftSmall).Mat;
+        private Mat rightMatSmall = new Image<Gray, byte>(Resources.rightSmall).Mat;
+
+        public void SaveMat(Mat mat, string fileName, bool needFileExtension = true)
         {
+#if DEBUG
+
             string directoryPath = Application.StartupPath + "\\upload\\image\\";
             if (!Directory.Exists(directoryPath))
             {
                 Directory.CreateDirectory(directoryPath);
             }
 
-            fileName = $"{directoryPath}{DateTime.Now.ToString("yyyyMMddHHmmss_ffff", DateTimeFormatInfo.InvariantInfo)}{fileName}"+(needFileExtension? ".jpg":"");
+            fileName = $"{directoryPath}{DateTime.Now.ToString("yyyyMMddHHmmss_ffff", DateTimeFormatInfo.InvariantInfo)}{fileName}" + (needFileExtension ? ".jpg" : "");
 
             mat.Save(fileName);
 
+#endif
+
         }
-        public void DrawRectAndSave(Mat mat, List<Rectangle> rectangles, string fileName)
+        public void DrawRectCircleAndSave(Mat mat, List<Rectangle> rectangles, string fileName, int offsetX = 0, int offsetY = 0, List<Point> points = null)
         {
-            foreach (var item in rectangles)
+#if DEBUG
+
+
+            if (mat.NumberOfChannels == 1)
             {
-                CvInvoke.Rectangle(mat, Rectangle.Round(item), new MCvScalar(0, 0, 255));
+                CvInvoke.CvtColor(mat, mat, ColorConversion.Gray2Bgr);
 
             }
+            foreach (var item in rectangles)
+            {
+                CvInvoke.Rectangle(mat, new Rectangle(item.X + offsetX, item.Y + offsetY, item.Width, item.Height), new MCvScalar(0, 0, 255));
+
+            }
+            if (points != null)
+            {
+                foreach (var p in points)
+                {
+                    CvInvoke.Circle(mat, p, 6, new MCvScalar(0, 0, 255), 2);
+                }
+            }
+
             SaveMat(mat, fileName);
+#endif
         }
         /// <summary>
         /// 获取最大的矩形，重叠和包括，只取最大,过滤长宽比例不协调的矩形，宽高比例不能>4或者0.24
         /// </summary>
         /// <param name="pointArray"></param>
         /// <returns></returns>
-        public List<Rectangle> GetRectList(VectorOfVectorOfPoint pointArray,bool needFilter=true)
+        public List<Rectangle> GetRectList(VectorOfVectorOfPoint pointArray, bool needFilter = true)
         {
 
 
@@ -218,7 +246,7 @@ namespace EmguTest
             for (int i = 1; i < list.Count; i++)
             {
                 var tmpRect = list[i];
-                if (bigRect.Width*bigRect.Height<tmpRect.Width*tmpRect.Height)
+                if (bigRect.Width * bigRect.Height < tmpRect.Width * tmpRect.Height)
                 {
                     bigRect = tmpRect;
                 }
@@ -228,14 +256,14 @@ namespace EmguTest
         }
 
         /// <summary>
-        /// 获取矩形框从图片中
+        /// 获取矩形框从图片中，如果选项为断开的时候最小面积为40，最大为600即可
         /// </summary>
         /// <param name="bitmap"></param>
         /// <param name="minArea">符合矩形框的最小面积，否则抛弃</param>
         /// <param name="originalStartX">在原始图片中的X起始位置</param>
         /// <param name="originalStartY">在原始图片中的Y起始位置</param>
         /// <returns></returns>
-        public List<Rectangle> GetRectListFromBitmap(Bitmap bitmap, double minArea = 200, double maxArea = 2000, int originalStartX = 0, int originalStartY = 0, bool isAutoFillFull = false, int optimizeTimes = 1)
+        public List<Rectangle> GetRectListFromBitmap(Bitmap bitmap, double minArea = 80, double maxArea = 2000, int originalStartX = 0, int originalStartY = 0, bool isAutoFillFull = false, int optimizeTimes = 1, bool isBrokenOption = false)
         {
             List<Rectangle> list;
 
@@ -255,9 +283,9 @@ namespace EmguTest
             Mat mat_threshold = new Mat();
             int myThreshold = 230;
             CvInvoke.Threshold(matGray, mat_threshold, myThreshold, 255, Emgu.CV.CvEnum.ThresholdType.Binary);
-            //SaveMat(mat_threshold, "二值化");
+            SaveMat(mat_threshold, "二值化");
             //形态学膨胀
-            //Mat mat_dilate = MyDilate(mat_threshold);
+            //Mat mat_dilate = MyDilate(mat_threshold, MorphOp.Dilate);
             //SaveMat(mat_threshold, "形态学膨胀");
             //边缘检测
             CvInvoke.Canny(mat_threshold, matCanny, 60, 180, 5);
@@ -270,6 +298,8 @@ namespace EmguTest
                 CvInvoke.FindContours(matCanny, contours, null, Emgu.CV.CvEnum.RetrType.Ccomp,
                     Emgu.CV.CvEnum.ChainApproxMethod.ChainApproxSimple);//提取轮廓
 
+
+
                 //获取符合条件的矩形  闭合矩形的面积>200
                 int size = contours.Size;
                 for (int i = 0; i < size; i++)
@@ -281,10 +311,162 @@ namespace EmguTest
                     if (tempArea > minArea && tempArea < maxArea)
                     {
                         validContours.Push(item);
+
                     }
                 }
 
+
                 list = GetRectList(validContours);
+                //画出去掉重合的矩形框
+                SaveMat(mat, "原始");
+                DrawRectCircleAndSave(mat, list, "去掉不符合规则的矩形框");
+                for (int i = 0; i < list.Count; i++)
+                {
+                    using (Mat tmpMat = new Mat(mat_threshold, list[i]))
+                    {
+
+
+                        //var fileName = OCRHelper.Ocr(tmpMat);
+                        //fileName = fileName.Replace("\n", "").Replace("\r", "").Replace("\\", "").Replace(" ", "").Replace("|", "");
+                        SaveMat(tmpMat, "解析后-" + i);
+                        //Console.WriteLine(fileName);
+                    }
+                }
+                //加入断开算法，
+                if (isBrokenOption)
+                {
+                    list = GroupBrokenRect(matGray, list);
+                }
+
+                GetLastRightTwoPoint(mat, out Point topRight, out Point bottomRight);
+
+
+
+
+
+
+
+                if (optimizeTimes > 0)
+                {
+                    list = OptimizeRect(list, optimizeTimes);
+                }
+                if (isAutoFillFull)
+                {
+                    list = FillFull(list, topRight, bottomRight);
+                }
+                //在原始开始位置上获取矩形列表
+                var originalRectList = new List<Rectangle>();
+                foreach (var item in list)
+                {
+                    var tmpRect = new Rectangle(new Point(originalStartX + item.X, originalStartY + item.Y), item.Size);
+
+                    originalRectList.Add(tmpRect);
+
+
+                }
+                return originalRectList;
+            }
+        }
+        /// <summary>
+        /// 获取矩形框从带有断开选项卡的图片中
+        /// </summary>
+        /// <param name="bitmap"></param>
+        /// <param name="minArea">符合矩形框的最小面积，否则抛弃</param>
+        /// <param name="originalStartX">在原始图片中的X起始位置</param>
+        /// <param name="originalStartY">在原始图片中的Y起始位置</param>
+        /// <returns></returns>
+        public List<Rectangle> GetRectListFromBrokenBitmap(Bitmap bitmap, double minArea = 80, double maxArea = 600, int originalStartX = 0, int originalStartY = 0, bool isAutoFillFull = false, int optimizeTimes = 0)
+        {
+            List<Rectangle> list;
+
+            Mat mat = new Image<Bgr, byte>(bitmap).Mat;// new Mat();
+            //降噪处理
+            //CvInvoke.PyrMeanShiftFiltering(matOrginal, mat, 25, 10, 1, new MCvTermCriteria(5, 1));
+
+            //图片灰度处理
+            Mat matCanny = new Mat();
+            Mat matGray = new Mat();
+            CvInvoke.CvtColor(mat, matGray, Emgu.CV.CvEnum.ColorConversion.Bgr2Gray);
+
+            //SaveMat(matGray, "普通灰度图片");
+
+            //二值化
+            Mat mat_threshold = new Mat();
+            int myThreshold = 230;
+            CvInvoke.Threshold(matGray, mat_threshold, myThreshold, 255, Emgu.CV.CvEnum.ThresholdType.Binary);
+            SaveMat(mat_threshold, "二值化");
+            //形态学膨胀
+            //Mat mat_dilate = MyDilate(mat_threshold, MorphOp.Dilate);
+            //SaveMat(mat_threshold, "形态学膨胀");
+            //边缘检测
+            CvInvoke.Canny(mat_threshold, matCanny, 60, 180, 5);
+            SaveMat(matCanny, "边缘检测");
+            //寻找答题卡矩形边界（所有的矩形）
+            using (VectorOfVectorOfPoint contours = new VectorOfVectorOfPoint())//创建VectorOfVectorOfPoint数据类型用于存储轮廓
+            using (VectorOfVectorOfPoint validContours = new VectorOfVectorOfPoint())
+            {//有效的，所有的选项的
+
+                CvInvoke.FindContours(matCanny, contours, null, Emgu.CV.CvEnum.RetrType.Ccomp,
+                    Emgu.CV.CvEnum.ChainApproxMethod.ChainApproxSimple);//提取轮廓
+
+                //画出所有的轮廓
+                var matCopy1 = mat.Clone();
+                CvInvoke.DrawContours(matCopy1, contours, -1, new MCvScalar(0, 0, 255));
+                SaveMat(matCopy1, "所有轮廓");
+
+                //获取符合条件的矩形  闭合矩形的面积>200
+                int size = contours.Size;
+                for (int i = 0; i < size; i++)
+                {
+                    var item = contours[i];
+                    var tempArea = CvInvoke.ContourArea(item);
+                    var tempArc = CvInvoke.ArcLength(item, true);
+                    Console.WriteLine($"面积：{tempArea}；周长：{tempArc}");
+                    if (tempArea > minArea && tempArea < maxArea)
+                    {
+                        validContours.Push(item);
+
+                    }
+                }
+                //画出所有有效的轮廓
+                //matCopy1 = mat.Clone();
+                //CvInvoke.DrawContours(matCopy1, validContours, -1, new MCvScalar(0, 0, 255));
+                //SaveMat(matCopy1, "所有有效轮廓");
+
+                list = GetRectList(validContours);
+                DrawRectCircleAndSave(mat.Clone(), list, "所有有效矩形框");
+
+
+                //进行
+                //for (int i = 0; i < list.Count; i++)
+                //{
+                //    using (Mat tmpMat = new Mat(mat_threshold, list[i]))
+                //    {
+
+
+                //        //var fileName = OCRHelper.Ocr(tmpMat);
+                //        //fileName = fileName.Replace("\n", "").Replace("\r", "").Replace("\\", "").Replace(" ", "").Replace("|", "");
+                //        SaveMat(tmpMat, "解析后-");
+                //        //Console.WriteLine(fileName);
+                //    }
+                //}
+
+                list = GroupBrokenRect(matGray, list);
+                DrawRectCircleAndSave(mat.Clone(), list, "分组后矩形框");
+
+                GetLastRightTwoPoint(mat_threshold, out Point topRight, out Point bottomRight);
+
+
+                if (optimizeTimes > 0)
+                {
+                    list = OptimizeRect(list, optimizeTimes);
+                }
+                if (isAutoFillFull)
+                {
+                    list = FillFull(list, topRight, bottomRight);
+                }
+
+
                 //在原始开始位置上获取矩形列表
                 var originalRectList = new List<Rectangle>();
                 foreach (var item in list)
@@ -297,33 +479,181 @@ namespace EmguTest
                 }
 
                 //画出去掉重合的矩形框
-                //SaveMat(mat, "原始");
-                //DrawRectAndSave(mat, originalRectList, "去掉重合的矩形框");
-                //for (int i = 0; i < list.Count; i++)
-                //{
-                //    using (Mat tmpMat = new Mat(mat_threshold, list[i]))
-                //    {
+                SaveMat(mat, "原始");
+                DrawRectCircleAndSave(mat, originalRectList, "填充优化后的矩形框");
 
-
-                //        var fileName = OCRHelper.Ocr(tmpMat);
-                //        fileName = fileName.Replace("\n", "").Replace("\r", "").Replace("\\", "").Replace(" ","").Replace("|","");
-                //        SaveMat(tmpMat, "解析后-" + fileName);
-                //        Console.WriteLine(fileName);
-                //    }
-                //}
-
-                if (isAutoFillFull)
-                {
-                    originalRectList = FillFull(originalRectList);
-                }
-
-                if (optimizeTimes > 0)
-                {
-                    originalRectList = OptimizeRect(originalRectList, optimizeTimes);
-                }
 
                 return originalRectList;
             }
+        }
+
+        /// <summary>
+        /// 获取图片中最右边的两个明点，必须要要在规定的方位内最少找到3个才算
+        /// </summary>
+        /// <param name="mat"></param>
+        /// <param name="TopRight">最右上方的</param>
+        /// <param name="BottomRight">最右下方的</param>
+        /// <returns></returns>
+        private void GetLastRightTwoPoint(Mat mat, out Point TopRight, out Point BottomRight)
+        {
+            TopRight = BottomRight = Point.Empty;
+
+            FastDetector detector = new FastDetector(30);
+            var pointList = detector.Detect(mat).Select(mp => mp.Point).OrderBy(p => p.X);
+            if (pointList?.Count() < 1)
+            {
+                return;
+            }
+            int lastValRightDistanc = 10;
+            int minValCount = 3;
+
+            var endX = pointList.LastOrDefault().X;
+
+            int validateCount = pointList.Where(p => p.X >= endX - lastValRightDistanc).ToList().Count;
+            if (validateCount < minValCount)
+            {
+                return;
+            }
+
+            pointList = pointList.OrderBy(p => p.Y);
+            var startY = pointList.FirstOrDefault().Y;
+            var endY = pointList.LastOrDefault().Y;
+
+            TopRight = new Point((int)endX, (int)startY);
+            BottomRight = new Point((int)endX, (int)endY);
+
+
+            return;
+        }
+
+        private List<Rectangle> GroupBrokenRect(Mat src, List<Rectangle> rectList)
+        {
+            if (rectList.Count == 0)
+            {
+                return rectList;
+            }
+            List<Rectangle> groupedRectList = new List<Rectangle>();
+
+            var dic = OrderRectListByRow(rectList);
+
+            Rectangle left = Rectangle.Empty, right = Rectangle.Empty;
+            foreach (var item in dic?.Values)
+            {
+                var tmpRects = item.OrderBy(r => r.X).ToList();
+                for (int i = 0; i < tmpRects.Count; i++)
+                {
+                    var currentRect = tmpRects[i];
+                    using (Mat currentMat = new Mat(src, currentRect))
+                    {
+                        bool isLeft = IsLeftBracket(currentMat);
+                        left = isLeft ? currentRect : left;
+                        right = isLeft ? right : (IsRightBracket(currentMat) ? currentRect : right);
+                        if (left != Rectangle.Empty && right != Rectangle.Empty && right.X > left.X)
+                        {
+                            var tmpRect = CvInvoke.cvMaxRect(left, right);
+                            if (tmpRect.Width < currentRect.Width * 5)
+                            {
+                                groupedRectList.Add(tmpRect);
+                                left = Rectangle.Empty;
+                                right = Rectangle.Empty;
+                            }
+                        }
+                    }
+
+                }
+                left = right = Rectangle.Empty;
+            }
+
+            return groupedRectList;
+        }
+        Rectangle ChoseRightRect(Rectangle left, Rectangle right)
+        {
+
+            if (left.X > right.X)
+            {
+                var temp = left;
+                left = right;
+                right = temp;
+            }
+            if (left.X + left.Width > right.X)
+            {
+                return left;
+            }
+
+            return right;
+        }
+
+        bool IsLeftBracket(Mat src)
+        {
+            return Similar(IsLargeMat(src.Size) ? leftMat : leftMatSmall, src) > 0.5;
+        }
+        bool IsRightBracket(Mat src)
+        {
+            return Similar(IsLargeMat(src.Size) ? rightMat : rightMatSmall, src) > 0.5;
+        }
+
+        /// <summary>
+        /// 相识度计算
+        /// </summary>
+        /// <param name="src"></param>
+        /// <param name="src2"></param>
+        /// <returns></returns>
+        double Similar(Mat src, Mat src2)
+        {
+
+            using (Mat gray1 = src.Clone())
+            using (Mat gray2 = src2.Clone())
+            {
+                if (gray1.NumberOfChannels != 1)
+                {
+                    CvInvoke.CvtColor(gray1, gray1, Emgu.CV.CvEnum.ColorConversion.Bgr2Gray);
+                }
+                if (gray2.NumberOfChannels != 1)
+                {
+                    CvInvoke.CvtColor(gray2, gray2, Emgu.CV.CvEnum.ColorConversion.Bgr2Gray);
+
+                }
+
+                var size = new Size(Math.Max(src.Width, src2.Width), Math.Max(src.Height, src2.Height));
+                CvInvoke.Resize(gray1, gray1, size);
+                CvInvoke.Resize(gray2, gray2, size);
+
+                int threshold = 230;
+                CvInvoke.Threshold(gray1, gray1, threshold, 255, ThresholdType.Binary);
+                CvInvoke.Threshold(gray2, gray2, threshold, 255, ThresholdType.Binary);
+
+                //CvInvoke.CalcHist()
+                Mat res = new Mat();
+                CvInvoke.AbsDiff(gray1, gray2, res);
+
+                //CvInvoke.Imshow("第一张", scaledImg1);
+                //CvInvoke.Imshow("第二张", scaledImg2);
+                //Mat mat1 = scaledImg1.Row(0);
+                //Mat mat2 = scaledImg2.Col(0);
+                //var r1 = CvInvoke.CompareHist(scaledImg1, scaledImg2, HistogramCompMethod.Correl);
+
+                //CvInvoke.Imshow("res", res);
+
+
+                //var all = 1;// Convert.ToDouble( CvInvoke.Sum(scaledImg1));
+                var sum1 = CvInvoke.Sum(gray1);
+                var sum = CvInvoke.Sum(res);
+                var result = (1 - sum.V0 / sum1.V0);
+                Console.WriteLine("相识度 result:" + result);
+                return result;
+            }
+
+
+        }
+
+        private bool IsLargeMat(Size src)
+        {
+            var area = src.Width * src.Height;
+
+            var largerArea = leftMat.Width * leftMat.Height;
+            var smallArea = leftMatSmall.Width * leftMatSmall.Height;
+            return Math.Abs(largerArea - area) < Math.Abs(smallArea - area);
+
         }
 
         /// <summary>
@@ -333,31 +663,39 @@ namespace EmguTest
         /// <param name="minArea">涂的答案最小面价</param>
         /// <param name="maxArea">涂的答案最大面价</param>
         /// <returns></returns>
-        public List<Point> GetCenterPointListFromBitmap(Bitmap bitmap, double minArea = 200, double maxArea = 2000) {
+        public List<Point> GetCenterPointListFromBitmap(Bitmap bitmap, double minArea = 200, double maxArea = 2000)
+        {
             var pointList = new List<Point>();
-           
+
             Mat src = new Image<Bgr, byte>(bitmap).Mat;// new Mat();
-            
+
             Mat dst = new Mat();
             Mat src_gray = new Mat();
             CvInvoke.CvtColor(src, src_gray, Emgu.CV.CvEnum.ColorConversion.Bgr2Gray);
-            
+
+            SaveMat(src_gray, "灰度后");
+
             #region 二值化
             //二值化
             Mat mat_threshold = new Mat();
-            int myThreshold = 210;
+            int myThreshold = 200;
             CvInvoke.Threshold(src_gray, mat_threshold, myThreshold, 255, Emgu.CV.CvEnum.ThresholdType.BinaryInv);
-           
+
             //思路 close -腐蚀-腐蚀-膨胀
             //形态学膨胀
-            Mat mat_dilate = MyDilate(mat_threshold, Emgu.CV.CvEnum.MorphOp.Close);
-            mat_dilate = MyDilate(mat_dilate, Emgu.CV.CvEnum.MorphOp.Erode);
-            mat_dilate = MyDilate(mat_dilate, Emgu.CV.CvEnum.MorphOp.Erode);
+            Mat mat_dilate = MyDilate(mat_threshold, Emgu.CV.CvEnum.MorphOp.Open);
+            SaveMat(mat_dilate, "open行学");
+
+            //mat_dilate = MyDilate(mat_dilate, Emgu.CV.CvEnum.MorphOp.Erode);
+            //mat_dilate = MyDilate(mat_dilate, Emgu.CV.CvEnum.MorphOp.Erode);
             mat_dilate = MyDilate(mat_dilate, Emgu.CV.CvEnum.MorphOp.Dilate);
+            //mat_dilate = MyDilate(mat_dilate, Emgu.CV.CvEnum.MorphOp.Dilate);
             #endregion
+            SaveMat(mat_dilate, "腐蚀后的");
 
             //边缘检测
-            CvInvoke.Canny(mat_dilate, dst,120, 180, 5);
+            CvInvoke.Canny(mat_dilate, dst, 120, 180, 5);
+            SaveMat(dst, "边缘检测后的");
 
             //寻找答题卡矩形边界（所有的矩形）
             VectorOfVectorOfPoint contours = new VectorOfVectorOfPoint();//创建VectorOfVectorOfPoint数据类型用于存储轮廓
@@ -365,7 +703,7 @@ namespace EmguTest
             VectorOfVectorOfPoint validContours = new VectorOfVectorOfPoint();//有效的，所有的选项的
 
             CvInvoke.FindContours(dst, contours, null, Emgu.CV.CvEnum.RetrType.Ccomp,
-                Emgu.CV.CvEnum.ChainApproxMethod.ChainApproxSimple, new Point(8, 8));//提取轮廓
+                Emgu.CV.CvEnum.ChainApproxMethod.ChainApproxSimple, new Point(0, 0));//提取轮廓
 
             //打印所以后矩形面积和周长
             int size = contours.Size;
@@ -373,28 +711,33 @@ namespace EmguTest
             {
                 var item = contours[i];
                 var tempArea = CvInvoke.ContourArea(item);
-                //var tempArc = CvInvoke.ArcLength(item, true);
-                //Console.WriteLine($"面积：{tempArea}；周长：{tempArc}"); ;
+                var tempArc = CvInvoke.ArcLength(item, true);
+                Console.WriteLine($"面积：{tempArea}；周长：{tempArc}"); ;
                 if (tempArea > minArea && tempArea < maxArea)
                 {
                     validContours.Push(item);
                 }
             }
             //画出所有轮廓
-            //Mat tmpMat = new Image<Bgr, byte>(bitmap).Mat;
-            //CvInvoke.DrawContours(tmpMat, validContours, -1, new MCvScalar(0, 0, 255), 1);
-            //SaveMat(tmpMat, "所有有效轮廓");
+            Mat tmpMat = new Image<Bgr, byte>(bitmap).Mat;
+            CvInvoke.DrawContours(tmpMat, validContours, -1, new MCvScalar(0, 0, 255), 1);
+            SaveMat(tmpMat, "所有有效轮廓");
             //CvInvoke.ApproxPolyDP
 
 
 
-            //画出所有矩形
+
             List<Rectangle> rectangles = GetRectList(validContours, false);
 
             rectangles.ForEach(rect =>
             {
-                pointList.Add(new Point(rect.X+rect.Width/2, rect.Y+rect.Height/2));
+                pointList.Add(new Point(rect.X + rect.Width / 2, rect.Y + rect.Height / 2));
             });
+
+
+            //保存原图和识别的中心点结果
+            SaveMat(src, "原图");
+            DrawRectCircleAndSave(src, rectangles, $"原图识别结果-阀门值{myThreshold}", points: pointList);
 
 
             return pointList;
@@ -407,29 +750,37 @@ namespace EmguTest
         /// <param name="bitmap">原图或者，截后的图片</param>
         /// <param name="rectList">选项卡矩形列表</param>
         /// <returns></returns>
-        public List<Point> GetCenterPointListFromBitmapByWhiteArea(Bitmap bitmap,List<Rectangle> rectList)
+        public List<Point> GetCenterPointListFromBitmapByWhiteArea(Bitmap bitmap, List<Rectangle> rectList)
         {
             var src = new Image<Gray, byte>(bitmap);
             var thresholdImage = src.CopyBlank();
-            int myThreshold = 210;
+            int myThreshold = 180;
             CvInvoke.Threshold(src, thresholdImage, myThreshold, 255, Emgu.CV.CvEnum.ThresholdType.BinaryInv);
+
+            SaveMat(thresholdImage.Mat, "二值化hou");
             //思路 close -腐蚀-腐蚀-膨胀
             //形态学膨胀
-            Mat mat_dilate = MyDilate(thresholdImage.Mat, Emgu.CV.CvEnum.MorphOp.Close);
-           
-            mat_dilate = MyDilate(mat_dilate, Emgu.CV.CvEnum.MorphOp.Erode);
-            mat_dilate = MyDilate(mat_dilate, Emgu.CV.CvEnum.MorphOp.Erode);
+            Mat mat_dilate = MyDilate(thresholdImage.Mat, Emgu.CV.CvEnum.MorphOp.Open);
+            SaveMat(mat_dilate, "close行学");
+
+            //mat_dilate = MyDilate(mat_dilate, Emgu.CV.CvEnum.MorphOp.Erode);
+            //mat_dilate = MyDilate(mat_dilate, Emgu.CV.CvEnum.MorphOp.Erode);
             mat_dilate = MyDilate(mat_dilate, Emgu.CV.CvEnum.MorphOp.Dilate);
+            //mat_dilate = MyDilate(mat_dilate, Emgu.CV.CvEnum.MorphOp.Dilate);
             var image_dilate = mat_dilate.ToImage<Gray, byte>();
+
+            //SaveMat(mat_dilate, "答题卡形学处理后");
+            DrawRectCircleAndSave(mat_dilate, rectList, "答题卡形学处理后");
 
             List<Rectangle> validRectList = new List<Rectangle>();
             rectList.ForEach(rect =>
             {
-                var newRect = new Rectangle(Math.Max(0, rect.X - 8), Math.Max(0, rect.Y - 8), rect.Width, rect.Height);
+                var newRect = new Rectangle( Math.Max(0, rect.X),  Math.Max(0, rect.Y), rect.Width, rect.Height);
                 var tmpImage = image_dilate.Copy(newRect);
 
                 var result = GetWhiteColorPercenter(tmpImage);
-                if (result > 0.2)
+                Console.WriteLine($"白色所占比：{result}");
+                if (result > 0.3)
                 {
                     validRectList.Add(rect);
                 }
@@ -441,6 +792,10 @@ namespace EmguTest
                 var tmpPoint = new Point(r.X + r.Width / 2, r.Y + r.Height / 2);
                 centerPoint.Add(tmpPoint);
             });
+
+            //保存原图和识别的中心点结果
+            SaveMat(src.Mat, "原图");
+            DrawRectCircleAndSave(src.Mat, validRectList, $"原图识别结果-阀门值{myThreshold}", points: centerPoint);
 
             return centerPoint;
         }
@@ -603,7 +958,7 @@ namespace EmguTest
                     if (rect.Width < averageWidth * qualifiedWidthPercent ||
                         rect.Height < averageHeight * qualifiedHeightPercent ||
                         (rect.Width < averageWidth * qualifiedPercent && rect.Height < averageHeight * qualifiedPercent) ||
-                        rect.Width > averageWidth * 2 || rect.Height > averageHeight * 2)
+                        rect.Width > averageWidth * 2 || rect.Height > averageHeight * 2 || (rect.Width > averageWidth * 1.3 || rect.Height > averageHeight * 1.3))
                     {
                         unqualifiedRectList.Add(rect);
                         continue;
@@ -630,7 +985,7 @@ namespace EmguTest
         /// </summary>
         /// <param name="sourceList"></param>
         /// <returns></returns>
-        public List<Rectangle> FillFull(List<Rectangle> sourceList)
+        public List<Rectangle> FillFull(List<Rectangle> sourceList, Point? topRight = null, Point? bottomRight = null)
         {
 
             if (sourceList.Count <= 2)
@@ -641,6 +996,7 @@ namespace EmguTest
             //去掉不合格的矩形
             sourceList = RemoveUnqualified(sourceList);
 
+
             //按照行分组,先Y，后X排序
             sourceList = sourceList.OrderBy(r => r.Y).ThenBy(r => r.X).ToList();
             var firstRect = sourceList.FirstOrDefault();
@@ -649,6 +1005,7 @@ namespace EmguTest
             int startX = firstRect.X, startY = firstRect.Y, endX = firstRect.X + firstRect.Width, endY = firstRect.Y + firstRect.Height;
             //double averageWidht = sourceList.Average(r => r.Width), averageHeight = sourceList.Average(r => r.Height);
             //double intervalWidth = 0, intervalHeight = 0;//间隙
+            CaculateRectInfo(sourceList, out double averageWidth, out double averageHeight, out double intervalWidth, out double intervalHeight);
 
             for (int i = 1; i < sourceList.Count; i++)
             {
@@ -660,11 +1017,19 @@ namespace EmguTest
 
                 if (rect.Y > (sourceList[i - 1].Y + sourceList[i - 1].Height))
                 {
+                    //计算中间间距所能容纳的行数
+                    //var yDistance = Math.Abs(sourceList[i - 1].Y - rect.Y);
+                    //var tmpNum = (int)Math.Ceiling(yDistance / ((averageHeight + intervalHeight) * 1.1));
+                    //rowNum += tmpNum;
                     rowNum++;
                     tempColNum = 1;
                 }
                 else
                 {
+                    //计算中间间距所能容纳的列数
+                    //var xDistance= Math.Abs( sourceList[i - 1].X - rect.X);
+                    //var tmpNum = (int)Math.Ceiling(xDistance / (averageWidth + intervalWidth));
+                    //tempColNum+=tmpNum;
                     tempColNum++;
 
                 }
@@ -674,8 +1039,31 @@ namespace EmguTest
             }
             //intervalWidth = (endX - startX - averageWidht * colNum) * 1.0 / (colNum - 1);
             //intervalHeight = (endY - startY - averageHeight * rowNum) * 1.0 / (rowNum - 1);
+            //从新核实列和行的数量
+            //var predictColNum = Math.Round((endX + averageWidth + intervalWidth - startX) / (averageWidth + intervalWidth));
+            //colNum = Math.Max(colNum, (int)predictColNum);
 
-            CaculateRectInfo(sourceList, out double averageWidth, out double averageHeight, out double intervalWidth, out double intervalHeight);
+            //var predictRowNum = Math.Round((endY + averageHeight + intervalHeight - startY) / (averageHeight + intervalHeight));
+            //rowNum = Math.Max(rowNum, (int)predictRowNum);
+
+            //效验列和行的数量
+            if (topRight.HasValue && topRight != Point.Empty && bottomRight.HasValue && bottomRight != Point.Empty)
+            {
+                var restColNum = (int)Math.Floor((topRight.Value.X - endX) / (averageWidth + intervalWidth));
+                colNum += Math.Max(0, restColNum);
+
+                var restRowNum = (int)Math.Floor((bottomRight.Value.Y - endY) / (averageHeight + intervalHeight));
+                rowNum += Math.Max(0, restRowNum);
+
+                //优化最上面行缺少的情况
+                restRowNum = (int)Math.Floor((startY - topRight.Value.Y) / (averageHeight + intervalHeight));
+                if (restRowNum > 0)
+                {
+                    sourceList.Insert(0, new Rectangle(startX, topRight.Value.Y, (int)averageWidth, (int)averageHeight));
+                }
+                rowNum += Math.Max(0, restRowNum);
+
+            }
 
             //从第一个开始逐步检查
             for (int i = 0; i < rowNum; i++)
@@ -695,8 +1083,10 @@ namespace EmguTest
             return sourceList;
         }
 
+
+
         /// <summary>
-        /// 计算矩形框队列的宽、高，行间隙、列间隙
+        /// 计算矩形框队列的宽、高，行间隙、列间隙,如果计算的间距小于1/4,则把间距设置为高或宽的1/3
         /// </summary>
         /// <param name="sourceList">数据源</param>
         /// <param name="averageWidth">矩形平均宽</param>
@@ -763,7 +1153,7 @@ namespace EmguTest
                     endY = Math.Max(endY, tempRects[i].Y);
 
                     var tempIntervalHeight = tempRects[i].Y - tempRects[i - 1].Height - tempRects[i - 1].Y;
-                    if (tempIntervalHeight < averageHeight)
+                    if (tempIntervalHeight < averageHeight * 1.3)
                     {
                         intervalHeightList.Add(tempIntervalHeight);
                     }
@@ -782,7 +1172,7 @@ namespace EmguTest
         }
 
         /// <summary>
-        /// 计算两点之间最可能拥有矩形的数量
+        /// 计算两点之间最可能的间距拥有矩形的数量，如果计算的间距小于1/4,则把间距设置为高或宽的1/3
         /// </summary>
         /// <param name="start"></param>
         /// <param name="end"></param>
@@ -790,9 +1180,10 @@ namespace EmguTest
         /// <returns></returns>
         private double CaculateInterval(int start, int end, double lenth)
         {
-            int count = (int)Math.Floor((end - start + lenth / 2) / lenth);
+            int count = (int)Math.Floor((end - start + lenth / 2) / (lenth));
 
             double interval = (end - start - lenth * count) * 1.0 / (count - 1);
+            interval = interval > lenth / 4 ? interval : lenth / 3;
             return interval;
         }
 
@@ -1035,13 +1426,13 @@ namespace EmguTest
         /// </summary>
         /// <param name="mat"></param>
         /// <returns></returns>
-        public Mat MyDilate(Mat mat,MorphOp morphop= MorphOp.Dilate)
+        public Mat MyDilate(Mat mat, MorphOp morphop = MorphOp.Dilate)
         {
             //1.膨胀，改善轮廓
             Mat struct_element = CvInvoke.GetStructuringElement(Emgu.CV.CvEnum.ElementShape.Rectangle,
                 new Size(5, 5), new Point(2, 2));//结构元素
             Mat mat_dilate = new Mat();
-            CvInvoke.MorphologyEx(mat, mat_dilate, morphop, struct_element, new Point(0, 0), 1,
+            CvInvoke.MorphologyEx(mat, mat_dilate, morphop, struct_element, new Point(-1, -1), 1,
                 Emgu.CV.CvEnum.BorderType.Default, new MCvScalar(255, 0, 0, 255));//形态学膨胀
 
             return mat_dilate;
@@ -1359,13 +1750,13 @@ namespace EmguTest
             return maxValue;
         }
 
-        public static Rectangle MoveRect(Rectangle originalRect,int offsetX,int offsetY)
+        public static Rectangle MoveRect(Rectangle originalRect, int offsetX, int offsetY)
         {
-            
+
             return new Rectangle(new Point(Math.Max(0, originalRect.X + offsetX), Math.Max(0, originalRect.Y + offsetY)), originalRect.Size);
-           
+
         }
-        public static List<Rectangle> MoveRects(List<Rectangle> originalRectList,int offsetX,int offsetY)
+        public static List<Rectangle> MoveRects(List<Rectangle> originalRectList, int offsetX, int offsetY)
         {
             var tmpList = new List<Rectangle>();
 
@@ -1376,5 +1767,27 @@ namespace EmguTest
 
             return tmpList;
         }
+
+        /// <summary>
+        /// 获取最下的矩形能包含所有的小矩形
+        /// </summary>
+        /// <param name="rectangles"></param>
+        /// <returns></returns>
+        public static Rectangle GetMaxRect(List<Rectangle> rectangles)
+        {
+            if (rectangles?.Count == 0)
+            {
+                return Rectangle.Empty;
+            }
+            var maxRect = rectangles.LastOrDefault();
+            for (int i = rectangles.Count - 2; i > -1; i--)
+            {
+                var rect = rectangles[i];
+                maxRect = CvInvoke.cvMaxRect(rect, maxRect);
+            }
+
+            return maxRect;
+        }
+
     }
 }

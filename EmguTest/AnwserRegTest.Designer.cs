@@ -33,10 +33,10 @@
             this.btn_validate = new System.Windows.Forms.Button();
             this.btn_recover = new System.Windows.Forms.Button();
             this.btn_wrap = new System.Windows.Forms.Button();
-            this.btn_regWrap = new System.Windows.Forms.Button();
             this.IsCalOffset = new System.Windows.Forms.CheckBox();
-            this.picSrc = new yue_juan_care.customerControl.PictureBoxReadCard();
             this.IsCalOffsetRow = new System.Windows.Forms.CheckBox();
+            this.btn_regWrap = new System.Windows.Forms.Button();
+            this.picSrc = new yue_juan_care.customerControl.PictureBoxReadCard();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picSrc)).BeginInit();
             this.SuspendLayout();
@@ -91,16 +91,6 @@
             this.btn_wrap.UseVisualStyleBackColor = true;
             this.btn_wrap.Click += new System.EventHandler(this.Btn_validate2_Click);
             // 
-            // btn_regWrap
-            // 
-            this.btn_regWrap.Location = new System.Drawing.Point(26, 198);
-            this.btn_regWrap.Name = "btn_regWrap";
-            this.btn_regWrap.Size = new System.Drawing.Size(75, 23);
-            this.btn_regWrap.TabIndex = 5;
-            this.btn_regWrap.Text = "校正透视";
-            this.btn_regWrap.UseVisualStyleBackColor = true;
-            this.btn_regWrap.Click += new System.EventHandler(this.Btn_regWrap_Click);
-            // 
             // IsCalOffset
             // 
             this.IsCalOffset.AutoSize = true;
@@ -110,6 +100,26 @@
             this.IsCalOffset.TabIndex = 6;
             this.IsCalOffset.Text = "是否计算列偏移量";
             this.IsCalOffset.UseVisualStyleBackColor = true;
+            // 
+            // IsCalOffsetRow
+            // 
+            this.IsCalOffsetRow.AutoSize = true;
+            this.IsCalOffsetRow.Location = new System.Drawing.Point(26, 96);
+            this.IsCalOffsetRow.Name = "IsCalOffsetRow";
+            this.IsCalOffsetRow.Size = new System.Drawing.Size(120, 16);
+            this.IsCalOffsetRow.TabIndex = 7;
+            this.IsCalOffsetRow.Text = "是否计算行偏移量";
+            this.IsCalOffsetRow.UseVisualStyleBackColor = true;
+            // 
+            // btn_regWrap
+            // 
+            this.btn_regWrap.Location = new System.Drawing.Point(26, 198);
+            this.btn_regWrap.Name = "btn_regWrap";
+            this.btn_regWrap.Size = new System.Drawing.Size(75, 23);
+            this.btn_regWrap.TabIndex = 5;
+            this.btn_regWrap.Text = "校正透视";
+            this.btn_regWrap.UseVisualStyleBackColor = true;
+            this.btn_regWrap.Click += new System.EventHandler(this.Btn_regWrap_Click);
             // 
             // picSrc
             // 
@@ -122,16 +132,6 @@
             this.picSrc.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.picSrc.TabIndex = 0;
             this.picSrc.TabStop = false;
-            // 
-            // IsCalOffsetRow
-            // 
-            this.IsCalOffsetRow.AutoSize = true;
-            this.IsCalOffsetRow.Location = new System.Drawing.Point(26, 96);
-            this.IsCalOffsetRow.Name = "IsCalOffsetRow";
-            this.IsCalOffsetRow.Size = new System.Drawing.Size(120, 16);
-            this.IsCalOffsetRow.TabIndex = 7;
-            this.IsCalOffsetRow.Text = "是否计算行偏移量";
-            this.IsCalOffsetRow.UseVisualStyleBackColor = true;
             // 
             // AnwserRegTest
             // 

@@ -31,9 +31,6 @@ namespace EmguTest
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            this.ib_original = new Emgu.CV.UI.ImageBox();
-            this.ib_middle = new Emgu.CV.UI.ImageBox();
-            this.ib_result = new Emgu.CV.UI.ImageBox();
             this.num_threshold = new System.Windows.Forms.NumericUpDown();
             this.btLoad = new System.Windows.Forms.Button();
             this.btStart = new System.Windows.Forms.Button();
@@ -47,8 +44,6 @@ namespace EmguTest
             this.btn_cut = new System.Windows.Forms.Button();
             this.btn_Plus = new System.Windows.Forms.Button();
             this.btn_reduce = new System.Windows.Forms.Button();
-            this.ib_middleCut = new Emgu.CV.UI.ImageBox();
-            this.tb_log = new System.Windows.Forms.TextBox();
             this.btn_openZoomForm = new System.Windows.Forms.Button();
             this.btn_rotate = new System.Windows.Forms.Button();
             this.btn_openZoomForm2 = new System.Windows.Forms.Button();
@@ -61,50 +56,25 @@ namespace EmguTest
             this.btn_answerReg3 = new System.Windows.Forms.Button();
             this.btn_answerReg4 = new System.Windows.Forms.Button();
             this.btn_openTemplate = new System.Windows.Forms.Button();
-            ((System.ComponentModel.ISupportInitialize)(this.ib_original)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.ib_middle)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.ib_result)).BeginInit();
+            this.btn_openCompressForm = new System.Windows.Forms.Button();
+            this.btn_regBrokenRect = new System.Windows.Forms.Button();
+            this.btn_cornerForm = new System.Windows.Forms.Button();
+            this.btn_reg2All = new System.Windows.Forms.Button();
+            this.ib_middleCut = new Emgu.CV.UI.ImageBox();
+            this.ib_result = new Emgu.CV.UI.ImageBox();
+            this.ib_middle = new Emgu.CV.UI.ImageBox();
+            this.ib_original = new Emgu.CV.UI.ImageBox();
+            this.bt_openOcrForm = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.num_threshold)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.num_Min)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.num_Max)).BeginInit();
             this.grp_rectGet.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.num_apertureSize)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.ib_middleCut)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.ib_result)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.ib_middle)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.ib_original)).BeginInit();
             this.SuspendLayout();
-            // 
-            // ib_original
-            // 
-            this.ib_original.FunctionalMode = Emgu.CV.UI.ImageBox.FunctionalModeOption.Minimum;
-            this.ib_original.Location = new System.Drawing.Point(33, 28);
-            this.ib_original.Name = "ib_original";
-            this.ib_original.Size = new System.Drawing.Size(357, 419);
-            this.ib_original.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.ib_original.TabIndex = 2;
-            this.ib_original.TabStop = false;
-            this.ib_original.Paint += new System.Windows.Forms.PaintEventHandler(this.Ib_original_Paint);
-            this.ib_original.MouseDown += new System.Windows.Forms.MouseEventHandler(this.Ib_original_MouseDown);
-            this.ib_original.MouseMove += new System.Windows.Forms.MouseEventHandler(this.Ib_original_MouseMove);
-            this.ib_original.MouseUp += new System.Windows.Forms.MouseEventHandler(this.Ib_original_MouseUp);
-            // 
-            // ib_middle
-            // 
-            this.ib_middle.FunctionalMode = Emgu.CV.UI.ImageBox.FunctionalModeOption.Minimum;
-            this.ib_middle.Location = new System.Drawing.Point(451, 28);
-            this.ib_middle.Name = "ib_middle";
-            this.ib_middle.Size = new System.Drawing.Size(368, 427);
-            this.ib_middle.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.ib_middle.TabIndex = 2;
-            this.ib_middle.TabStop = false;
-            // 
-            // ib_result
-            // 
-            this.ib_result.FunctionalMode = Emgu.CV.UI.ImageBox.FunctionalModeOption.Minimum;
-            this.ib_result.Location = new System.Drawing.Point(863, 28);
-            this.ib_result.Name = "ib_result";
-            this.ib_result.Size = new System.Drawing.Size(353, 427);
-            this.ib_result.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.ib_result.TabIndex = 2;
-            this.ib_result.TabStop = false;
             // 
             // num_threshold
             // 
@@ -262,24 +232,6 @@ namespace EmguTest
             this.btn_reduce.UseVisualStyleBackColor = true;
             this.btn_reduce.Click += new System.EventHandler(this.Btn_reduce_Click);
             // 
-            // ib_middleCut
-            // 
-            this.ib_middleCut.FunctionalMode = Emgu.CV.UI.ImageBox.FunctionalModeOption.PanAndZoom;
-            this.ib_middleCut.Location = new System.Drawing.Point(1297, 28);
-            this.ib_middleCut.Name = "ib_middleCut";
-            this.ib_middleCut.Size = new System.Drawing.Size(381, 427);
-            this.ib_middleCut.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.ib_middleCut.TabIndex = 17;
-            this.ib_middleCut.TabStop = false;
-            // 
-            // tb_log
-            // 
-            this.tb_log.Location = new System.Drawing.Point(763, 486);
-            this.tb_log.Multiline = true;
-            this.tb_log.Name = "tb_log";
-            this.tb_log.Size = new System.Drawing.Size(146, 41);
-            this.tb_log.TabIndex = 18;
-            // 
             // btn_openZoomForm
             // 
             this.btn_openZoomForm.Location = new System.Drawing.Point(417, 493);
@@ -361,9 +313,9 @@ namespace EmguTest
             // 
             this.btn_answerReg.Location = new System.Drawing.Point(203, 700);
             this.btn_answerReg.Name = "btn_answerReg";
-            this.btn_answerReg.Size = new System.Drawing.Size(88, 23);
+            this.btn_answerReg.Size = new System.Drawing.Size(135, 23);
             this.btn_answerReg.TabIndex = 27;
-            this.btn_answerReg.Text = "答案卡识别2";
+            this.btn_answerReg.Text = "答案卡识别2(不带框)";
             this.btn_answerReg.UseVisualStyleBackColor = true;
             this.btn_answerReg.Click += new System.EventHandler(this.Btn_answerReg_Click);
             // 
@@ -381,9 +333,9 @@ namespace EmguTest
             // 
             this.btn_answerReg4.Location = new System.Drawing.Point(203, 775);
             this.btn_answerReg4.Name = "btn_answerReg4";
-            this.btn_answerReg4.Size = new System.Drawing.Size(88, 23);
+            this.btn_answerReg4.Size = new System.Drawing.Size(115, 23);
             this.btn_answerReg4.TabIndex = 29;
-            this.btn_answerReg4.Text = "答案卡识别4";
+            this.btn_answerReg4.Text = "答案卡识别4(带框)";
             this.btn_answerReg4.UseVisualStyleBackColor = true;
             this.btn_answerReg4.Click += new System.EventHandler(this.Btn_answerReg4_Click);
             // 
@@ -397,11 +349,110 @@ namespace EmguTest
             this.btn_openTemplate.UseVisualStyleBackColor = true;
             this.btn_openTemplate.Click += new System.EventHandler(this.Btn_openTemplate_Click);
             // 
+            // btn_openCompressForm
+            // 
+            this.btn_openCompressForm.Location = new System.Drawing.Point(524, 700);
+            this.btn_openCompressForm.Name = "btn_openCompressForm";
+            this.btn_openCompressForm.Size = new System.Drawing.Size(99, 23);
+            this.btn_openCompressForm.TabIndex = 31;
+            this.btn_openCompressForm.Text = "打开压缩";
+            this.btn_openCompressForm.UseVisualStyleBackColor = true;
+            this.btn_openCompressForm.Click += new System.EventHandler(this.Btn_openCompressForm_Click);
+            // 
+            // btn_regBrokenRect
+            // 
+            this.btn_regBrokenRect.Location = new System.Drawing.Point(330, 601);
+            this.btn_regBrokenRect.Name = "btn_regBrokenRect";
+            this.btn_regBrokenRect.Size = new System.Drawing.Size(114, 23);
+            this.btn_regBrokenRect.TabIndex = 32;
+            this.btn_regBrokenRect.Text = "识别断开的矩形框";
+            this.btn_regBrokenRect.UseVisualStyleBackColor = true;
+            this.btn_regBrokenRect.Click += new System.EventHandler(this.Btn_regBrokenRect_Click);
+            // 
+            // btn_cornerForm
+            // 
+            this.btn_cornerForm.Location = new System.Drawing.Point(524, 745);
+            this.btn_cornerForm.Name = "btn_cornerForm";
+            this.btn_cornerForm.Size = new System.Drawing.Size(99, 23);
+            this.btn_cornerForm.TabIndex = 33;
+            this.btn_cornerForm.Text = "打开角检测";
+            this.btn_cornerForm.UseVisualStyleBackColor = true;
+            this.btn_cornerForm.Click += new System.EventHandler(this.Btn_cornerForm_Click);
+            // 
+            // btn_reg2All
+            // 
+            this.btn_reg2All.Location = new System.Drawing.Point(362, 699);
+            this.btn_reg2All.Name = "btn_reg2All";
+            this.btn_reg2All.Size = new System.Drawing.Size(113, 23);
+            this.btn_reg2All.TabIndex = 34;
+            this.btn_reg2All.Text = "整图识别(不带框)";
+            this.btn_reg2All.UseVisualStyleBackColor = true;
+            this.btn_reg2All.Click += new System.EventHandler(this.Btn_reg2All_Click);
+            // 
+            // ib_middleCut
+            // 
+            this.ib_middleCut.FunctionalMode = Emgu.CV.UI.ImageBox.FunctionalModeOption.PanAndZoom;
+            this.ib_middleCut.Location = new System.Drawing.Point(1297, 28);
+            this.ib_middleCut.Name = "ib_middleCut";
+            this.ib_middleCut.Size = new System.Drawing.Size(381, 427);
+            this.ib_middleCut.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.ib_middleCut.TabIndex = 17;
+            this.ib_middleCut.TabStop = false;
+            // 
+            // ib_result
+            // 
+            this.ib_result.FunctionalMode = Emgu.CV.UI.ImageBox.FunctionalModeOption.Minimum;
+            this.ib_result.Location = new System.Drawing.Point(863, 28);
+            this.ib_result.Name = "ib_result";
+            this.ib_result.Size = new System.Drawing.Size(353, 427);
+            this.ib_result.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.ib_result.TabIndex = 2;
+            this.ib_result.TabStop = false;
+            // 
+            // ib_middle
+            // 
+            this.ib_middle.FunctionalMode = Emgu.CV.UI.ImageBox.FunctionalModeOption.Minimum;
+            this.ib_middle.Location = new System.Drawing.Point(451, 28);
+            this.ib_middle.Name = "ib_middle";
+            this.ib_middle.Size = new System.Drawing.Size(368, 427);
+            this.ib_middle.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.ib_middle.TabIndex = 2;
+            this.ib_middle.TabStop = false;
+            // 
+            // ib_original
+            // 
+            this.ib_original.FunctionalMode = Emgu.CV.UI.ImageBox.FunctionalModeOption.Minimum;
+            this.ib_original.Location = new System.Drawing.Point(33, 28);
+            this.ib_original.Name = "ib_original";
+            this.ib_original.Size = new System.Drawing.Size(357, 419);
+            this.ib_original.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.ib_original.TabIndex = 2;
+            this.ib_original.TabStop = false;
+            this.ib_original.Paint += new System.Windows.Forms.PaintEventHandler(this.Ib_original_Paint);
+            this.ib_original.MouseDown += new System.Windows.Forms.MouseEventHandler(this.Ib_original_MouseDown);
+            this.ib_original.MouseMove += new System.Windows.Forms.MouseEventHandler(this.Ib_original_MouseMove);
+            this.ib_original.MouseUp += new System.Windows.Forms.MouseEventHandler(this.Ib_original_MouseUp);
+            // 
+            // bt_openOcrForm
+            // 
+            this.bt_openOcrForm.Location = new System.Drawing.Point(698, 492);
+            this.bt_openOcrForm.Name = "bt_openOcrForm";
+            this.bt_openOcrForm.Size = new System.Drawing.Size(98, 23);
+            this.bt_openOcrForm.TabIndex = 35;
+            this.bt_openOcrForm.Text = "打开OCR识别窗口";
+            this.bt_openOcrForm.UseVisualStyleBackColor = true;
+            this.bt_openOcrForm.Click += new System.EventHandler(this.Bt_openOcrForm_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1727, 835);
+            this.Controls.Add(this.bt_openOcrForm);
+            this.Controls.Add(this.btn_reg2All);
+            this.Controls.Add(this.btn_cornerForm);
+            this.Controls.Add(this.btn_regBrokenRect);
+            this.Controls.Add(this.btn_openCompressForm);
             this.Controls.Add(this.btn_openTemplate);
             this.Controls.Add(this.btn_answerReg4);
             this.Controls.Add(this.btn_answerReg3);
@@ -414,7 +465,6 @@ namespace EmguTest
             this.Controls.Add(this.btn_openZoomForm2);
             this.Controls.Add(this.btn_rotate);
             this.Controls.Add(this.btn_openZoomForm);
-            this.Controls.Add(this.tb_log);
             this.Controls.Add(this.ib_middleCut);
             this.Controls.Add(this.btn_reduce);
             this.Controls.Add(this.btn_Plus);
@@ -430,17 +480,16 @@ namespace EmguTest
             this.Controls.Add(this.ib_original);
             this.Name = "Form1";
             this.Text = "Form1";
-            ((System.ComponentModel.ISupportInitialize)(this.ib_original)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.ib_middle)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.ib_result)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.num_threshold)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.num_Min)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.num_Max)).EndInit();
             this.grp_rectGet.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.num_apertureSize)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.ib_middleCut)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.ib_result)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.ib_middle)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.ib_original)).EndInit();
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
@@ -463,7 +512,6 @@ namespace EmguTest
         private Button btn_Plus;
         private Button btn_reduce;
         private Emgu.CV.UI.ImageBox ib_middleCut;
-        private TextBox tb_log;
         private Button btn_openZoomForm;
         private Button btn_rotate;
         private Button btn_openZoomForm2;
@@ -476,6 +524,11 @@ namespace EmguTest
         private Button btn_answerReg3;
         private Button btn_answerReg4;
         private Button btn_openTemplate;
+        private Button btn_openCompressForm;
+        private Button btn_regBrokenRect;
+        private Button btn_cornerForm;
+        private Button btn_reg2All;
+        private Button bt_openOcrForm;
     }
 
 

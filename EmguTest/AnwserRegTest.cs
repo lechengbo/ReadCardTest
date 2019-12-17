@@ -23,7 +23,7 @@ namespace EmguTest
         public Paper ValidatedPaper { get; set; }
         public Paper OriginalPaper { get; set; }
         public Mat OriginalMat { get; set; }
-
+        public object LineSegment { get; private set; }
 
         public AnwserRegTest(Paper paper)
         {
@@ -41,11 +41,19 @@ namespace EmguTest
                 //Image<Bgr, Byte> img = new Image<Bgr, byte>(op.FileName);
                 //var image = Image.FromFile(op.FileName);
                 var bitmap = new Bitmap(fileName);
+                bitmap = this.OriginalPaper.GetBitmap(bitmap);
+                //if (!this.OriginalPaper.Size.IsEmpty)
+                //{
+                //    var image = new Image<Bgr, byte>(bitmap);
+                //    image= image.Resize(this.OriginalPaper.Size.Width, this.OriginalPaper.Size.Height, Emgu.CV.CvEnum.Inter.Linear, false);
+                //    bitmap = image.Bitmap;
+                //}
                 this.OriginalBitmap = (Bitmap)bitmap.Clone();
 
                 this.picSrc.SetContainer(this.panel1);
 
                 Btn_recover_Click(null, null);
+                //Emgu.CV.Structure.
             }
 
         }
@@ -165,22 +173,22 @@ namespace EmguTest
             //左上
             var leftTopArea = this.OriginalPaper.FixedPoint.LeftTop.GetEnlargeOuter();
             var cutBitmap = PictureBoxReadCard.Cut(this.OriginalBitmap, leftTopArea.X, leftTopArea.Y, leftTopArea.Width, leftTopArea.Height);
-            var leftTopInner = common.GetBigRectFromBitmap(cutBitmap, 1000, 6000, leftTopArea.X, leftTopArea.Y);
+            var leftTopInner = common.GetBigRectFromBitmap(cutBitmap, 500, 6000, leftTopArea.X, leftTopArea.Y);
             desPoints.Add(leftTopInner.Location);
             //右上
             var rightTopArea = this.OriginalPaper.FixedPoint.RightTop.GetEnlargeOuter();
             var rightTopBitmap = PictureBoxReadCard.Cut(this.OriginalBitmap, rightTopArea);
-            var rightTopInner = common.GetBigRectFromBitmap(rightTopBitmap, 1000, 6000, rightTopArea.X, rightTopArea.Y);
+            var rightTopInner = common.GetBigRectFromBitmap(rightTopBitmap, 500, 6000, rightTopArea.X, rightTopArea.Y);
             desPoints.Add(CommonUse.PointToPointF(rightTopInner.Location));
             //右下
             var rightBottomArea = this.OriginalPaper.FixedPoint.RightBottom.GetEnlargeOuter();
             var rightBottomBitmap = PictureBoxReadCard.Cut(this.OriginalBitmap, rightBottomArea);
-            var rightBottomInner = common.GetBigRectFromBitmap(rightBottomBitmap, 1000, 6000, rightBottomArea.X, rightBottomArea.Y);
+            var rightBottomInner = common.GetBigRectFromBitmap(rightBottomBitmap, 500, 6000, rightBottomArea.X, rightBottomArea.Y);
             desPoints.Add(CommonUse.PointToPointF(rightBottomInner.Location));
             //左下
             var leftBottomArea = this.OriginalPaper.FixedPoint.LeftBottom.GetEnlargeOuter();
             var leftBottomBitmap = PictureBoxReadCard.Cut(this.OriginalBitmap, leftBottomArea);
-            var leftBottomInner = common.GetBigRectFromBitmap(leftBottomBitmap, 1000, 6000, leftBottomArea.X, leftBottomArea.Y);
+            var leftBottomInner = common.GetBigRectFromBitmap(leftBottomBitmap, 500, 6000, leftBottomArea.X, leftBottomArea.Y);
             desPoints.Add(CommonUse.PointToPointF(leftBottomInner.Location));
 
 

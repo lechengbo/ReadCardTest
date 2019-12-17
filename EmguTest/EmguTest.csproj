@@ -89,11 +89,29 @@
     <Compile Include="CompareForm.Designer.cs">
       <DependentUpon>CompareForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="CornerFinderForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CornerFinderForm.Designer.cs">
+      <DependentUpon>CornerFinderForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MachineTrainingFrom.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MachineTrainingFrom.Designer.cs">
+      <DependentUpon>MachineTrainingFrom.cs</DependentUpon>
+    </Compile>
+    <Compile Include="OCRForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="OCRForm.Designer.cs">
+      <DependentUpon>OCRForm.cs</DependentUpon>
     </Compile>
     <Compile Include="PaperRegResultShowForm.cs">
       <SubType>Form</SubType>
@@ -101,10 +119,17 @@
     <Compile Include="PaperRegResultShowForm.Designer.cs">
       <DependentUpon>PaperRegResultShowForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="PicCompressForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PicCompressForm.Designer.cs">
+      <DependentUpon>PicCompressForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="PictureHelper.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Service\OCRHelper.cs" />
+    <Compile Include="Service\Utility.cs" />
     <Compile Include="TemplateValidate.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -132,11 +157,23 @@
     <EmbeddedResource Include="CompareForm.resx">
       <DependentUpon>CompareForm.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="CornerFinderForm.resx">
+      <DependentUpon>CornerFinderForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="MachineTrainingFrom.resx">
+      <DependentUpon>MachineTrainingFrom.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="OCRForm.resx">
+      <DependentUpon>OCRForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="PaperRegResultShowForm.resx">
       <DependentUpon>PaperRegResultShowForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PicCompressForm.resx">
+      <DependentUpon>PicCompressForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -146,6 +183,7 @@
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
     <EmbeddedResource Include="TemplateValidate.resx">
       <DependentUpon>TemplateValidate.cs</DependentUpon>
@@ -176,12 +214,23 @@
     <None Include="tessdata\eng.traineddata">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="tessdata\jtycard.traineddata">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="License-LGPL.txt" />
+    <EmbeddedResource Include="Resources\left.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\right.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <Content Include="Resources\leftSmall.jpg" />
+    <Content Include="Resources\rightSmall.jpg" />
     <Content Include="source\card.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

@@ -29,6 +29,8 @@
         private void InitializeComponent()
         {
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.ckb_save = new System.Windows.Forms.CheckBox();
+            this.btn_openHaved = new System.Windows.Forms.Button();
             this.ckb_isRow = new System.Windows.Forms.CheckBox();
             this.btn_offset = new System.Windows.Forms.Button();
             this.btn_resultShow = new System.Windows.Forms.Button();
@@ -50,8 +52,7 @@
             this.lbl_picNumInfo = new System.Windows.Forms.Label();
             this.btn_loadMult = new System.Windows.Forms.Button();
             this.group_Config = new System.Windows.Forms.GroupBox();
-            this.btn_openHaved = new System.Windows.Forms.Button();
-            this.ckb_save = new System.Windows.Forms.CheckBox();
+            this.cb_isA4 = new System.Windows.Forms.CheckBox();
             this.groupBox1.SuspendLayout();
             this.panel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.ib_result)).BeginInit();
@@ -65,6 +66,7 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.cb_isA4);
             this.groupBox1.Controls.Add(this.ckb_save);
             this.groupBox1.Controls.Add(this.btn_openHaved);
             this.groupBox1.Controls.Add(this.ckb_isRow);
@@ -81,6 +83,26 @@
             this.groupBox1.TabIndex = 0;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "单张图片自定义选择测试";
+            // 
+            // ckb_save
+            // 
+            this.ckb_save.AutoSize = true;
+            this.ckb_save.Location = new System.Drawing.Point(546, 250);
+            this.ckb_save.Name = "ckb_save";
+            this.ckb_save.Size = new System.Drawing.Size(48, 16);
+            this.ckb_save.TabIndex = 11;
+            this.ckb_save.Text = "保存";
+            this.ckb_save.UseVisualStyleBackColor = true;
+            // 
+            // btn_openHaved
+            // 
+            this.btn_openHaved.Location = new System.Drawing.Point(454, 289);
+            this.btn_openHaved.Name = "btn_openHaved";
+            this.btn_openHaved.Size = new System.Drawing.Size(85, 23);
+            this.btn_openHaved.TabIndex = 10;
+            this.btn_openHaved.Text = "打开已有的";
+            this.btn_openHaved.UseVisualStyleBackColor = true;
+            this.btn_openHaved.Click += new System.EventHandler(this.Btn_openHaved_Click);
             // 
             // ckb_isRow
             // 
@@ -320,25 +342,15 @@
             this.group_Config.TabStop = false;
             this.group_Config.Text = "公共参数设置";
             // 
-            // btn_openHaved
+            // cb_isA4
             // 
-            this.btn_openHaved.Location = new System.Drawing.Point(454, 289);
-            this.btn_openHaved.Name = "btn_openHaved";
-            this.btn_openHaved.Size = new System.Drawing.Size(85, 23);
-            this.btn_openHaved.TabIndex = 10;
-            this.btn_openHaved.Text = "打开已有的";
-            this.btn_openHaved.UseVisualStyleBackColor = true;
-            this.btn_openHaved.Click += new System.EventHandler(this.Btn_openHaved_Click);
-            // 
-            // ckb_save
-            // 
-            this.ckb_save.AutoSize = true;
-            this.ckb_save.Location = new System.Drawing.Point(546, 250);
-            this.ckb_save.Name = "ckb_save";
-            this.ckb_save.Size = new System.Drawing.Size(48, 16);
-            this.ckb_save.TabIndex = 11;
-            this.ckb_save.Text = "保存";
-            this.ckb_save.UseVisualStyleBackColor = true;
+            this.cb_isA4.AutoSize = true;
+            this.cb_isA4.Location = new System.Drawing.Point(546, 44);
+            this.cb_isA4.Name = "cb_isA4";
+            this.cb_isA4.Size = new System.Drawing.Size(60, 16);
+            this.cb_isA4.TabIndex = 12;
+            this.cb_isA4.Text = "标准A4";
+            this.cb_isA4.UseVisualStyleBackColor = true;
             // 
             // ChoseOptionTestForm
             // 
@@ -393,5 +405,6 @@
         private System.Windows.Forms.CheckBox ckb_isRow;
         private System.Windows.Forms.Button btn_openHaved;
         private System.Windows.Forms.CheckBox ckb_save;
+        private System.Windows.Forms.CheckBox cb_isA4;
     }
 }

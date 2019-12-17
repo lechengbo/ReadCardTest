@@ -69,7 +69,7 @@ namespace EmguTest
 
         private void Btn_compare_Click(object sender, EventArgs e)
         {
-            var r2 = Similar2(this.picCompare1.Image.Bitmap, this.picCompare2.Image.Bitmap);
+            //var r2 = Similar2(this.picCompare1.Image.Bitmap, this.picCompare2.Image.Bitmap);
             //CvInvoke.im
             //var orignalBitmap = new Bitmap(this.picSrc1.Image);
             //bitmap = bitmap.Clone(new Rectangle(0,0,bitmap.Width,bitmap.Height), bitmap.PixelFormat);
@@ -118,7 +118,8 @@ namespace EmguTest
             CvInvoke.CvtColor(src, gray1, Emgu.CV.CvEnum.ColorConversion.Bgr2Gray);
             CvInvoke.CvtColor(src2, gray2, Emgu.CV.CvEnum.ColorConversion.Bgr2Gray);
 
-            var size = src.Size;
+            var size = new Size(Math.Max( src.Width,src2.Width),Math.Max(src.Height,src2.Height));
+            CvInvoke.Resize(gray1, gray1, size);
             CvInvoke.Resize(gray2, gray2, size);
             using (var scaledImg1 = gray1)
             using (var scaledImg2 = gray2)

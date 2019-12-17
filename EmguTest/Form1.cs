@@ -1,4 +1,5 @@
 ﻿using Emgu.CV;
+using Emgu.CV.Features2D;
 using Emgu.CV.Structure;
 using Emgu.CV.Util;
 using System;
@@ -68,28 +69,28 @@ namespace EmguTest
 
                 ib_result.Image = mat_Perspective;
                 //准考证号，x=230+26*5,y=40+17*10
-                tb_log.Text = commonUse.GetValueAndDrawGrid(ib_result, selected_contours, 230, 26, 5, 40, 17, 10, "准考证号：");
+                //tb_log.Text = commonUse.GetValueAndDrawGrid(ib_result, selected_contours, 230, 26, 5, 40, 17, 10, "准考证号：");
 
-                //答题区1-5题，x=8+25*5,y=230+16*4
-                tb_log.Text += commonUse.GetValueAndDrawGrid(ib_result, selected_contours, 8, 25, 5, 230, 16, 4, "1-5：");
+                ////答题区1-5题，x=8+25*5,y=230+16*4
+                //tb_log.Text += commonUse.GetValueAndDrawGrid(ib_result, selected_contours, 8, 25, 5, 230, 16, 4, "1-5：");
 
-                //答题区6-10题,x=159+25*5,y=230+16*4
-                tb_log.Text += commonUse.GetValueAndDrawGrid(ib_result, selected_contours, 159, 25, 5, 230, 16, 4, "6-10：");
+                ////答题区6-10题,x=159+25*5,y=230+16*4
+                //tb_log.Text += commonUse.GetValueAndDrawGrid(ib_result, selected_contours, 159, 25, 5, 230, 16, 4, "6-10：");
 
-                //答题区11-15题,x=310+25*5,y=230+16*4
-                tb_log.Text += commonUse.GetValueAndDrawGrid(ib_result, selected_contours, 310, 25, 5, 230, 16, 4, "11-15：");
+                ////答题区11-15题,x=310+25*5,y=230+16*4
+                //tb_log.Text += commonUse.GetValueAndDrawGrid(ib_result, selected_contours, 310, 25, 5, 230, 16, 4, "11-15：");
 
-                //答题区16-20题,x=461+25*5,y=230+16*4
-                tb_log.Text += commonUse.GetValueAndDrawGrid(ib_result, selected_contours, 461, 25, 5, 230, 16, 4, "16-20：");
+                ////答题区16-20题,x=461+25*5,y=230+16*4
+                //tb_log.Text += commonUse.GetValueAndDrawGrid(ib_result, selected_contours, 461, 25, 5, 230, 16, 4, "16-20：");
 
-                //答题区21-25题,x=8+25*5,y=312+16*4
-                tb_log.Text += commonUse.GetValueAndDrawGrid(ib_result, selected_contours, 8, 25, 5, 312, 16, 4, "21-25：");
+                ////答题区21-25题,x=8+25*5,y=312+16*4
+                //tb_log.Text += commonUse.GetValueAndDrawGrid(ib_result, selected_contours, 8, 25, 5, 312, 16, 4, "21-25：");
 
-                //答题区26-30题,x=159+25*5,y=312+16*4
-                tb_log.Text += commonUse.GetValueAndDrawGrid(ib_result, selected_contours, 159, 25, 5, 312, 16, 4, "26-30：");
+                ////答题区26-30题,x=159+25*5,y=312+16*4
+                //tb_log.Text += commonUse.GetValueAndDrawGrid(ib_result, selected_contours, 159, 25, 5, 312, 16, 4, "26-30：");
 
-                //答题区31-35题,x=310+25*5,y=312+16*4
-                tb_log.Text += commonUse.GetValueAndDrawGrid(ib_result, selected_contours, 310, 25, 5, 312, 16, 4, "31-35：");
+                ////答题区31-35题,x=310+25*5,y=312+16*4
+                //tb_log.Text += commonUse.GetValueAndDrawGrid(ib_result, selected_contours, 310, 25, 5, 312, 16, 4, "31-35：");
             }
             else
             {
@@ -401,7 +402,7 @@ namespace EmguTest
 
             CommonUse commonUse = new CommonUse();
 
-            var rectList = commonUse.GetRectListFromBitmap(this.ib_middleCut.Image.Bitmap,150,6000,0,0,true,2);
+            var rectList = commonUse.GetRectListFromBitmap(this.ib_middleCut.Image.Bitmap,100,2000,0,0,true,1);
 
             //排序
             var rectListDic = commonUse.OrderRectList(rectList);
@@ -650,7 +651,7 @@ namespace EmguTest
             CommonUse commonUse = new CommonUse();
 
             
-            var centerList = commonUse.GetCenterPointListFromBitmap(this.ib_middleCut.Image.Bitmap);
+            var centerList = commonUse.GetCenterPointListFromBitmap(this.ib_middleCut.Image.Bitmap,(int)this.num_threshold.Value);//300分辨率用200,150分辨率用45
             Mat tmpMat = new Image<Bgr, byte>(this.ib_middleCut.Image.Bitmap).Mat;
             centerList.ForEach(p =>
             {
@@ -706,6 +707,99 @@ namespace EmguTest
         {
             TemplateValidate templateValidate = new TemplateValidate();
             templateValidate.Show();
+        }
+
+        private void Btn_openCompressForm_Click(object sender, EventArgs e)
+        {
+            PicCompressForm form = new PicCompressForm();
+            form.Show();
+        }
+
+        private void Btn_regBrokenRect_Click(object sender, EventArgs e)
+        {
+            //FastDetector
+            if (this.ib_middleCut.Image == null)
+            {
+                MessageBox.Show("裁剪图片不能为空");
+                return;
+            }
+
+            CommonUse commonUse = new CommonUse();
+
+            var rectList = commonUse.GetRectListFromBitmap(this.ib_middleCut.Image.Bitmap,40,600, isAutoFillFull: true,optimizeTimes:2,isBrokenOption:true);
+
+            //排序
+            var rectListDic = commonUse.OrderRectList(rectList);
+
+            Mat src = new Image<Bgr, byte>(ib_middleCut.Image.Bitmap).Mat;
+
+            foreach (var item in rectList)
+            {
+                CvInvoke.Rectangle(src, item, new MCvScalar(0, 0, 255));
+            }
+
+            commonUse.SaveMat(src, "获取裁剪图中的所有轮廓边界提取");
+
+            this.ib_middle.Image = src;
+
+            //在原始图片中画出矩形框
+            var orginalRectList = new List<Rectangle>();
+            foreach (var item in rectList)
+            {
+                var tmpRect = new Rectangle(new Point(this.destRect.X + item.X, this.destRect.Y + item.Y), item.Size);
+                orginalRectList.Add(tmpRect);
+
+
+            }
+            Mat matOrginal = new Image<Bgr, byte>(this.ib_original.Image.Bitmap).Mat;
+            foreach (var item in orginalRectList)
+            {
+                CvInvoke.Rectangle(matOrginal, Rectangle.Round(item), new MCvScalar(0, 0, 255));
+
+            }
+            commonUse.SaveMat(matOrginal, "获取裁剪图中的所有轮廓边在原始图中");
+            this.ib_result.Image = matOrginal;
+
+            //在原始的PictureBox中画出框
+
+            this.DrawRectInPictureBox(this.ib_original, orginalRectList);
+
+            //
+            OrginalRectList = orginalRectList;
+            CutedRectList = rectList;
+        }
+
+        private void Btn_cornerForm_Click(object sender, EventArgs e)
+        {
+            CornerFinderForm form = new CornerFinderForm();
+            form.Show();
+        }
+
+        private void Btn_reg2All_Click(object sender, EventArgs e)
+        {
+            if (this.ib_original.Image == null)
+            {
+                MessageBox.Show("原始图片不能为空");
+                return;
+            }
+
+            CommonUse commonUse = new CommonUse();
+
+
+            var centerList = commonUse.GetCenterPointListFromBitmap(this.ib_original.Image.Bitmap, (int)this.num_threshold.Value);//300分辨率用200,150分辨率用45
+            Mat tmpMat = new Image<Bgr, byte>(this.ib_original.Image.Bitmap).Mat;
+            centerList.ForEach(p =>
+            {
+                CvInvoke.Circle(tmpMat, p, 6, new MCvScalar(0, 0, 255), 2);
+            });
+
+            this.ib_result.Image = tmpMat;
+        }
+
+        private void Bt_openOcrForm_Click(object sender, EventArgs e)
+        {
+            OCRForm form = new OCRForm();
+            form.Show();
         }
     }
 }

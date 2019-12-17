@@ -22,8 +22,25 @@ namespace ReadCardTest
         public Form1()
         {
             InitializeComponent();
+            //SetStyle(
+            //    ControlStyles.AllPaintingInWmPaint |  //全部在窗口绘制消息中绘图
+            //    ControlStyles.OptimizedDoubleBuffer, //使用双缓冲
+            //    true);
 
         }
+        /////<summary>
+        ///// 设置控件窗口创建参数的扩展风格
+        /////</summary>
+        //protected override CreateParams CreateParams
+        //{
+        //    get
+        //    {
+        //        CreateParams cp = base.CreateParams;
+        //        cp.ExStyle |= 0x02000000;
+        //        return cp;
+        //    }
+        //}
+
 
         private void Button1_Click(object sender, EventArgs e)
         {
@@ -104,12 +121,13 @@ namespace ReadCardTest
             menuLevel2.AddChild(menuLevel3_3);
             menuLevel2.AddChild(menuLevel3_4);
 
-            var menuLevel2_1 = new SunMenu("准考证重复") { Level = 2,Count=0 };
+            var menuLevel2_1 = new SunMenu("准考证重复") { Level = 2,Count=0, Expand = true, };
             var menuLevel3_5 = new SunMenu("生物考试5.jpg")
             {
                 Level = 3,
                 OperateButtonList = new List<ClickType>() { ClickType.Delete },
                 Param = "我是传递的参数",
+                
                 ClickHandler = (type, param) =>
                 {
                     Console.WriteLine($"你点击了{type.ToString()},{param}");

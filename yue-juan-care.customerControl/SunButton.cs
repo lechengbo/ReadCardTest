@@ -14,8 +14,8 @@ namespace yue_juan_care.customerControl
     public partial class SunButton : Button
     {
         public ClickType ButtonType { get; set; } = ClickType.Title;
-        public bool  IsExpand { get; set; }
-        public SunMenu SunMenu { get; set; }
+        //public bool  IsExpand { get; set; }
+        //public SunMenu SunMenu { get; set; }
         //public object Param { get; set; }
         public SunButton()
         {
@@ -26,6 +26,7 @@ namespace yue_juan_care.customerControl
         {
             base.OnPaint(pe);
         }
+
     }
 
     /// <summary>
@@ -45,5 +46,9 @@ namespace yue_juan_care.customerControl
         /// 点击忽略
         /// </summary>
         Ignore,
+        /// <summary>
+        /// 缺考标记
+        /// </summary>
+        AbsentMark
     }
 }

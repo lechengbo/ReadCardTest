@@ -43,10 +43,18 @@ namespace EmguTest
                 //Image<Bgr, Byte> img = new Image<Bgr, byte>(op.FileName);
                 //var image = Image.FromFile(op.FileName);
                 var bitmap = new Bitmap(fileName);
+                if (this.cb_isA4.Checked)
+                {
+                    var image = new Image<Bgr, byte>(bitmap);
+                    image= image.Resize(1133, 1555, Emgu.CV.CvEnum.Inter.Linear,false);
+                    bitmap = image.Bitmap;
+                    this.Paper.Size = new Size(1133, 1555);
+                }
+                
 
                 this.ib_original.LoadImage(bitmap);
 
-                this.Paper = new Paper() { TemplatePath=fileName};
+                this.Paper.TemplatePath=fileName;
 
             }
         }
@@ -314,6 +322,13 @@ namespace EmguTest
                 //Image<Bgr, Byte> img = new Image<Bgr, byte>(op.FileName);
                 //var image = Image.FromFile(op.FileName);
                 var bitmap = new Bitmap(this.Paper.TemplatePath);
+                bitmap = this.Paper.GetBitmap(bitmap);
+                //if (!this.Paper.Size.IsEmpty)
+                //{
+                //    var image = new Image<Bgr, byte>(bitmap);
+                //    image = image.Resize(this.Paper.Size.Width, this.Paper.Size.Height, Emgu.CV.CvEnum.Inter.Linear, false);
+                //    bitmap = image.Bitmap;
+                //}
 
                 this.ib_original.LoadImage(bitmap);
 

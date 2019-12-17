@@ -50,11 +50,12 @@
             // 
             // panel1
             // 
+            this.panel1.AutoSize = true;
             this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.panel1.Controls.Add(this.picSrc1);
             this.panel1.Location = new System.Drawing.Point(23, 49);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(346, 251);
+            this.panel1.Size = new System.Drawing.Size(368, 291);
             this.panel1.TabIndex = 0;
             // 
             // picSrc1
@@ -64,28 +65,29 @@
             this.picSrc1.MinWidth = 0;
             this.picSrc1.Name = "picSrc1";
             this.picSrc1.RegionInfo = null;
-            this.picSrc1.Size = new System.Drawing.Size(340, 245);
+            this.picSrc1.Size = new System.Drawing.Size(353, 283);
             this.picSrc1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.picSrc1.TabIndex = 0;
             this.picSrc1.TabStop = false;
             // 
             // panel2
             // 
+            this.panel2.AutoScroll = true;
             this.panel2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.panel2.Controls.Add(this.picSrc2);
-            this.panel2.Location = new System.Drawing.Point(23, 336);
+            this.panel2.Location = new System.Drawing.Point(21, 446);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(346, 272);
+            this.panel2.Size = new System.Drawing.Size(370, 291);
             this.panel2.TabIndex = 1;
             // 
             // picSrc2
             // 
             this.picSrc2.CurrentSelectedRect = null;
-            this.picSrc2.Location = new System.Drawing.Point(0, 3);
+            this.picSrc2.Location = new System.Drawing.Point(-2, 3);
             this.picSrc2.MinWidth = 0;
             this.picSrc2.Name = "picSrc2";
             this.picSrc2.RegionInfo = null;
-            this.picSrc2.Size = new System.Drawing.Size(343, 266);
+            this.picSrc2.Size = new System.Drawing.Size(359, 283);
             this.picSrc2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.picSrc2.TabIndex = 0;
             this.picSrc2.TabStop = false;
@@ -112,7 +114,7 @@
             // 
             // btn_load1
             // 
-            this.btn_load1.Location = new System.Drawing.Point(386, 49);
+            this.btn_load1.Location = new System.Drawing.Point(397, 49);
             this.btn_load1.Name = "btn_load1";
             this.btn_load1.Size = new System.Drawing.Size(75, 23);
             this.btn_load1.TabIndex = 3;
@@ -122,7 +124,7 @@
             // 
             // btn_load2
             // 
-            this.btn_load2.Location = new System.Drawing.Point(395, 340);
+            this.btn_load2.Location = new System.Drawing.Point(429, 450);
             this.btn_load2.Name = "btn_load2";
             this.btn_load2.Size = new System.Drawing.Size(75, 23);
             this.btn_load2.TabIndex = 4;
@@ -160,7 +162,7 @@
             // 
             // CompareForm
             // 
-            this.ClientSize = new System.Drawing.Size(974, 680);
+            this.ClientSize = new System.Drawing.Size(1181, 821);
             this.Controls.Add(this.lbl_result);
             this.Controls.Add(this.btn_compare);
             this.Controls.Add(this.btn_cut);

@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Emgu.CV;
+using Emgu.CV.Structure;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -9,6 +11,7 @@ namespace EmguTest.Aggregation
 {
     public class Paper
     {
+        public Size Size { get; set; }
         public string TemplatePath { get; set; }
         public FixedPoint FixedPoint { get; set; } = new FixedPoint();
         public List<OptionArea> OptionAreaList { get; set; } = new List<OptionArea>();
@@ -132,6 +135,17 @@ namespace EmguTest.Aggregation
             return list;
         }
 
+        public Bitmap GetBitmap(Bitmap bitmap)
+        {
+            if (!this.Size.IsEmpty)
+            {
+                var image = new Image<Bgr, byte>(bitmap);
+                image = image.Resize(this.Size.Width, this.Size.Height, Emgu.CV.CvEnum.Inter.Linear, false);
+                bitmap = image.Bitmap;
+            }
+
+            return bitmap;
+        }
 
 
     }
@@ -239,8 +253,9 @@ namespace EmguTest.Aggregation
     }
 
     /// <summary>
-    /// 偏移量区域，规范，最高线和最低线距离最近的偏移测量点大于2个偏移高度
-    /// 左右距离需要大于0.8个偏移点宽度
+    /// 偏移量区域，规范，最高线和最低线距离最近的偏移测量点大于1.5个偏移高度
+    /// 左右距离需要大于0.6个偏移点宽度
+    /// 横向的,上下0.4个宽度，左右大于0.8个高度度即可
     /// </summary>
     public class OffsetArea
     {
@@ -262,13 +277,10 @@ namespace EmguTest.Aggregation
                 offsetList = offsetList.OrderBy(r => r.X).ToList();
             }
 
-
-            //var averageWidth = rectangles.Average(r => r.Width);
-            //var averageHeight = rectangles.Average(r => r.Height);
-            //var first = rectangles.FirstOrDefault();
-            //var last = rectangles.LastOrDefault();
-
-            //if(first.X+averageWidth/2)>area.X+
+            if (!Validate(area, offsetList, offsetType))
+            {
+                //throw new Exception("偏移区域离偏移块太近");
+            }
 
             this.Area = area;
             this.OffsetList = offsetList;
@@ -288,9 +300,66 @@ namespace EmguTest.Aggregation
                 this.OffsetType);
         }
 
-       
+        public static bool Validate(Rectangle area, List<Rectangle> offsetList, OffsetType offsetType = OffsetType.Column)
+        {
+            bool isValidate = true;
+
+            if(offsetType== OffsetType.Column)
+            {
+                isValidate = ValidateColumn(area, offsetList);
+            }
+            else
+            {
+                isValidate = ValidateRow(area, offsetList);
+            }
+
+            return isValidate;
+        }
+
+        private static bool ValidateColumn(Rectangle area, List<Rectangle> offsetList) {
+            /// 偏移量区域，规范，最高线和最低线距离最近的偏移测量点大于1.5个偏移高度
+            /// 左右距离需要大于0.6个偏移点宽度
+            bool isValidate = true;
+
+            
+            var averageWidth = offsetList.Average(r => r.Width);
+            var averageHeight = offsetList.Average(r => r.Height);
+            var maxRect = CommonUse.GetMaxRect(offsetList);
+
+            if (averageWidth * 0.6 > maxRect.X || area.Width - averageWidth * 0.6 < maxRect.X+maxRect.Width
+                || averageHeight * 1.5 > maxRect.Y  || area.Height< maxRect.Y+maxRect.Height+ averageHeight * 1.5)
+            {
+                return false;
+            }
+
+
+            return isValidate;
+        }
+        private static bool ValidateRow(Rectangle area, List<Rectangle> offsetList)
+        {
+            //横向的,上下0.4个宽度，左右大于0.8个高度度即可
+            bool isValidate = true;
+
+            var averageWidth = offsetList.Average(r => r.Width);
+            var averageHeight = offsetList.Average(r => r.Height);
+            var maxRect = CommonUse.GetMaxRect(offsetList);
+
+
+            if (maxRect.X< 0.4*averageWidth || maxRect.X+ maxRect.Width+ 0.4 * averageWidth>area.Width
+                || maxRect.Y< 0.8 * averageHeight || maxRect.Y+ maxRect.Height+ 0.8 * averageHeight > area.Height)
+            {
+                return false;
+            }
+
+
+
+            return isValidate;
+        }
+
+
 
     }
+    
     /// <summary>
     /// 偏移量信息
     /// </summary>
@@ -359,6 +428,13 @@ namespace EmguTest.Aggregation
                 nearestOffsetInfo = tmpOffsetInfo;
             }
             return (nearestOffsetInfo.GetWidthOffset(), nearestOffsetInfo.GetHeightOffset());
+        }
+
+        public static (int offsetX,int offsetY) GetNearest(List<OffsetInfo> offsetInfos, Rectangle rect)
+        {
+            var rowOffset = GetNearestByRow(offsetInfos, rect);
+            var colOffset = GetNearestByColumn(offsetInfos, rect);
+            return (rowOffset.offsetX + colOffset.offsetX, rowOffset.offsetY + colOffset.offsetY);
         }
 
         public static List<OffsetInfo> NewListByColumn(List<Rectangle> originalList,List<Rectangle> newList)
