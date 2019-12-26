@@ -1,4 +1,6 @@
-﻿using EmguTest.Service;
+﻿using Emgu.CV.ML;
+using Emgu.CV.OCR;
+using EmguTest.Service;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -49,6 +51,10 @@ namespace EmguTest
         {
             var text = OCRHelper.OcrJty(this.picSrc.GetFirstRegionRect());
             this.tb_ocrResult.Text = text;
+            //OcrInvoke
+            SVM sVM = new SVM();
+            
+           
         }
     }
 }

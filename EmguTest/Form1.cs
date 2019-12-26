@@ -2,6 +2,7 @@
 using Emgu.CV.Features2D;
 using Emgu.CV.Structure;
 using Emgu.CV.Util;
+using EmguTest.Service;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -670,16 +671,44 @@ namespace EmguTest
             }
            
             CommonUse commonUse = new CommonUse();
-
-
-            var centerList = commonUse.GetCenterPointListFromBitmapByWhiteArea(this.ib_middleCut.Image.Bitmap,CutedRectList);
-            Mat tmpMat = new Image<Bgr, byte>(this.ib_middleCut.Image.Bitmap).Mat;
-            centerList.ForEach(p =>
+            var centerList = new List<Point>();
+            if (!this.ck_IsIntell.Checked)
             {
-                CvInvoke.Circle(tmpMat, p, 6, new MCvScalar(0, 0, 255),2);
-            });
+                centerList = commonUse.GetCenterPointListFromBitmapByWhiteArea(this.ib_middleCut.Image.Bitmap, CutedRectList);
 
-            this.ib_result.Image = tmpMat;
+                Mat tmpMat = new Image<Bgr, byte>(this.ib_middleCut.Image.Bitmap).Mat;
+                centerList.ForEach(p =>
+                {
+                    CvInvoke.Circle(tmpMat, p, 6, new MCvScalar(0, 0, 255), 2);
+                });
+
+                this.ib_result.Image = tmpMat;
+
+            }
+            else
+            {
+                var rectList = new List<Rectangle>();
+                CutedRectList.ForEach(r =>
+                {
+                    
+                    r.Offset(destRect.Location);
+                    rectList.Add(r);
+                });
+                CVArea area = new CVArea(this.destRect, commonUse.OrderRectList(rectList, IsFillFull: false));
+                centerList = commonUse.GetCenterPointListFromBitmapByWhiteArea(this.ib_original.Image.Bitmap, new List<CVArea>() { area });
+
+                Mat tmpMat = new Image<Bgr, byte>(this.ib_original.Image.Bitmap).Mat;
+                centerList.ForEach(p =>
+                {
+                    CvInvoke.Circle(tmpMat, p, 6, new MCvScalar(0, 0, 255), 2);
+                });
+
+                this.ib_result.Image = tmpMat;
+
+                return;
+            }
+
+            
         }
         private double Similar2(Bitmap bitmap1, Bitmap bitmap2)
         {
@@ -800,6 +829,14 @@ namespace EmguTest
         {
             OCRForm form = new OCRForm();
             form.Show();
+        }
+
+        private void Bt_openTrainForm_Click(object sender, EventArgs e)
+        {
+            MachineTrainingFrom form = new MachineTrainingFrom();
+            form.Show();
+
+                
         }
     }
 }

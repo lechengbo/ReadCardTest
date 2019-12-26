@@ -246,7 +246,13 @@ namespace EmguTest.Aggregation
                 HeightInterval = this.HeightInterval };
             var offsetCol = OffsetInfo.GetNearestByColumn(offsetInfos, this.Area);
             var offsetRow = OffsetInfo.GetNearestByRow(offsetInfos, this.Area);
-            newOptionArea.Area = CommonUse.MoveRect(this.Area, offsetCol.offsetX+offsetRow.offsetX, offsetCol.offsetY+offsetRow.offsetY);
+            int xAvgCount = 0, yavgCount = 0;
+            xAvgCount += offsetCol.offsetX == 0 ? 0 : 1;
+            xAvgCount += offsetRow.offsetX == 0 ? 0 : 1;
+            yavgCount += offsetCol.offsetY == 0 ? 0 : 1;
+            yavgCount += offsetRow.offsetY == 0 ? 0 : 1;
+
+            newOptionArea.Area = CommonUse.MoveRect(this.Area, (offsetCol.offsetX+offsetRow.offsetX), (offsetCol.offsetY+offsetRow.offsetY));
 
             return newOptionArea;
         }

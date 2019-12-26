@@ -254,6 +254,17 @@ namespace EmguTest
 
             return bigRect;
         }
+        public List<Rectangle> Reduce(List<Rectangle> rectList,int inflateW=-1,int inflateH=-1)
+        {
+            List<Rectangle> list = new List<Rectangle>();
+           
+            rectList.ForEach(r =>
+            {
+                r.Inflate(inflateW, inflateH);
+                list.Add(r);
+            });
+            return list;
+        }
 
         /// <summary>
         /// 获取矩形框从图片中，如果选项为断开的时候最小面积为40，最大为600即可
@@ -320,18 +331,18 @@ namespace EmguTest
                 //画出去掉重合的矩形框
                 SaveMat(mat, "原始");
                 DrawRectCircleAndSave(mat, list, "去掉不符合规则的矩形框");
-                for (int i = 0; i < list.Count; i++)
-                {
-                    using (Mat tmpMat = new Mat(mat_threshold, list[i]))
-                    {
+                //for (int i = 0; i < list.Count; i++)
+                //{
+                //    using (Mat tmpMat = new Mat(mat_threshold, list[i]))
+                //    {
 
 
-                        //var fileName = OCRHelper.Ocr(tmpMat);
-                        //fileName = fileName.Replace("\n", "").Replace("\r", "").Replace("\\", "").Replace(" ", "").Replace("|", "");
-                        SaveMat(tmpMat, "解析后-" + i);
-                        //Console.WriteLine(fileName);
-                    }
-                }
+                //        //var fileName = OCRHelper.Ocr(tmpMat);
+                //        //fileName = fileName.Replace("\n", "").Replace("\r", "").Replace("\\", "").Replace(" ", "").Replace("|", "");
+                //        SaveMat(tmpMat, "解析后-" + i);
+                //        //Console.WriteLine(fileName);
+                //    }
+                //}
                 //加入断开算法，
                 if (isBrokenOption)
                 {
@@ -364,6 +375,9 @@ namespace EmguTest
 
 
                 }
+                //缩小
+                originalRectList= Reduce(originalRectList);
+
                 return originalRectList;
             }
         }
@@ -482,7 +496,7 @@ namespace EmguTest
                 SaveMat(mat, "原始");
                 DrawRectCircleAndSave(mat, originalRectList, "填充优化后的矩形框");
 
-
+                
                 return originalRectList;
             }
         }
@@ -748,6 +762,40 @@ namespace EmguTest
         /// 获取答案中心点，通过答题卡涂的面积大小来判断
         /// </summary>
         /// <param name="bitmap">原图或者，截后的图片</param>
+        /// <param name="cVAreaList">选项卡和区域矩形框，都是bitmap（0,0）的坐标</param>
+        /// <returns></returns>
+        public List<Point> GetCenterPointListFromBitmapByWhiteArea(Bitmap bitmap, List<CVArea> cVAreaList)
+        {
+            var src = new Image<Gray, byte>(bitmap);
+            cVAreaList.ForEach(a =>
+            {
+                using (var copy = src.Copy(a.Area))
+                {
+                    a.Recognition(copy);
+                    
+                }
+            });
+
+
+            List<Point> centerPointList = new List<Point>();
+            List<Rectangle> rectList = new List<Rectangle>();
+            cVAreaList.ForEach(a =>
+            {
+                centerPointList.AddRange(a.GetResultPointList());
+                rectList.AddRange(a.GetRectList());
+            });
+            //保存原图和识别的中心点结果
+            SaveMat(src.Mat, "原图");
+            DrawRectCircleAndSave(src.Mat, rectList, $"原图识别结果-智能识别", points: centerPointList);
+
+            return centerPointList;
+        }
+
+
+        /// <summary>
+        /// 获取答案中心点，通过答题卡涂的面积大小来判断
+        /// </summary>
+        /// <param name="bitmap">原图或者，截后的图片</param>
         /// <param name="rectList">选项卡矩形列表</param>
         /// <returns></returns>
         public List<Point> GetCenterPointListFromBitmapByWhiteArea(Bitmap bitmap, List<Rectangle> rectList)
@@ -799,7 +847,15 @@ namespace EmguTest
 
             return centerPoint;
         }
+
+
         private double GetWhiteColorPercenter(Image<Gray, byte> image)
+        {
+
+            return GetWhiteColorPercenterS(image);
+
+        }
+        public static double GetWhiteColorPercenterS(Image<Gray, byte> image)
         {
 
             int rank = image.Data.GetLength(0);
@@ -1427,6 +1483,18 @@ namespace EmguTest
         /// <param name="mat"></param>
         /// <returns></returns>
         public Mat MyDilate(Mat mat, MorphOp morphop = MorphOp.Dilate)
+        {
+            ////1.膨胀，改善轮廓
+            //Mat struct_element = CvInvoke.GetStructuringElement(Emgu.CV.CvEnum.ElementShape.Rectangle,
+            //    new Size(5, 5), new Point(2, 2));//结构元素
+            //Mat mat_dilate = new Mat();
+            //CvInvoke.MorphologyEx(mat, mat_dilate, morphop, struct_element, new Point(-1, -1), 1,
+            //    Emgu.CV.CvEnum.BorderType.Default, new MCvScalar(255, 0, 0, 255));//形态学膨胀
+
+            return MyDilateS(mat,morphop);
+        }
+
+        public static Mat MyDilateS(Mat mat, MorphOp morphop = MorphOp.Dilate)
         {
             //1.膨胀，改善轮廓
             Mat struct_element = CvInvoke.GetStructuringElement(Emgu.CV.CvEnum.ElementShape.Rectangle,

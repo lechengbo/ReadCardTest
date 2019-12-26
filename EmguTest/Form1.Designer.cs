@@ -65,6 +65,8 @@ namespace EmguTest
             this.ib_middle = new Emgu.CV.UI.ImageBox();
             this.ib_original = new Emgu.CV.UI.ImageBox();
             this.bt_openOcrForm = new System.Windows.Forms.Button();
+            this.bt_openTrainForm = new System.Windows.Forms.Button();
+            this.ck_IsIntell = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.num_threshold)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.num_Min)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.num_Max)).BeginInit();
@@ -437,17 +439,39 @@ namespace EmguTest
             // 
             this.bt_openOcrForm.Location = new System.Drawing.Point(698, 492);
             this.bt_openOcrForm.Name = "bt_openOcrForm";
-            this.bt_openOcrForm.Size = new System.Drawing.Size(98, 23);
+            this.bt_openOcrForm.Size = new System.Drawing.Size(121, 23);
             this.bt_openOcrForm.TabIndex = 35;
             this.bt_openOcrForm.Text = "打开OCR识别窗口";
             this.bt_openOcrForm.UseVisualStyleBackColor = true;
             this.bt_openOcrForm.Click += new System.EventHandler(this.Bt_openOcrForm_Click);
+            // 
+            // bt_openTrainForm
+            // 
+            this.bt_openTrainForm.Location = new System.Drawing.Point(698, 541);
+            this.bt_openTrainForm.Name = "bt_openTrainForm";
+            this.bt_openTrainForm.Size = new System.Drawing.Size(121, 23);
+            this.bt_openTrainForm.TabIndex = 36;
+            this.bt_openTrainForm.Text = "打开训练字库窗口";
+            this.bt_openTrainForm.UseVisualStyleBackColor = true;
+            this.bt_openTrainForm.Click += new System.EventHandler(this.Bt_openTrainForm_Click);
+            // 
+            // ck_IsIntell
+            // 
+            this.ck_IsIntell.AutoSize = true;
+            this.ck_IsIntell.Location = new System.Drawing.Point(348, 781);
+            this.ck_IsIntell.Name = "ck_IsIntell";
+            this.ck_IsIntell.Size = new System.Drawing.Size(72, 16);
+            this.ck_IsIntell.TabIndex = 37;
+            this.ck_IsIntell.Text = "是否智能";
+            this.ck_IsIntell.UseVisualStyleBackColor = true;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1727, 835);
+            this.Controls.Add(this.ck_IsIntell);
+            this.Controls.Add(this.bt_openTrainForm);
             this.Controls.Add(this.bt_openOcrForm);
             this.Controls.Add(this.btn_reg2All);
             this.Controls.Add(this.btn_cornerForm);
@@ -490,6 +514,7 @@ namespace EmguTest
             ((System.ComponentModel.ISupportInitialize)(this.ib_middle)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.ib_original)).EndInit();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -529,6 +554,8 @@ namespace EmguTest
         private Button btn_cornerForm;
         private Button btn_reg2All;
         private Button bt_openOcrForm;
+        private Button bt_openTrainForm;
+        private CheckBox ck_IsIntell;
     }
 
 
