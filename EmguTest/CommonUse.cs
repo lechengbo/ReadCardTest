@@ -35,7 +35,7 @@ namespace EmguTest
                 Directory.CreateDirectory(directoryPath);
             }
 
-            fileName = $"{directoryPath}{DateTime.Now.ToString("yyyyMMddHHmmss_ffff", DateTimeFormatInfo.InvariantInfo)}{fileName}" + (needFileExtension ? ".jpg" : "");
+            fileName = $"{directoryPath}{DateTime.Now.ToString("yyyyMMddHHmmss_ffff", DateTimeFormatInfo.InvariantInfo)}-{fileName}" + (needFileExtension ? ".jpg" : "");
 
             mat.Save(fileName);
 
@@ -917,6 +917,7 @@ namespace EmguTest
                 if (item.Y > (sourceList[i - 1].Y + sourceList[i - 1].Height))
                 {
                     rowNum++;
+                    
                     tmpRectList = new List<Rectangle>();
                     tmpRectList.Add(item);
                     pairs.Add(rowNum, tmpRectList);
@@ -925,6 +926,13 @@ namespace EmguTest
                 {
                     tmpRectList.Add(item);
                 }
+            }
+
+            //再次按照x方向排序
+            var keys = pairs.Keys.ToList();
+            foreach (var key in keys)
+            {
+                pairs[key] = pairs[key].OrderBy(r => r.X).ToList();
             }
 
             return pairs;
@@ -960,6 +968,14 @@ namespace EmguTest
                     tmpRectList.Add(item);
                 }
             }
+
+            //再次按照y方向排序
+            var keys = pairs.Keys.ToList();
+            foreach (var key in keys)
+            {
+                pairs[key] = pairs[key].OrderBy(r => r.Y).ToList();
+            }
+
 
             return pairs;
 

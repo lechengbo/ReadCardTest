@@ -16,16 +16,16 @@ namespace EmguTest.Service
         public static int stepThreshold = 20;
 
         private Dictionary<int, List<Rectangle>> dicRectList;
-        public CVArea(Rectangle area, Dictionary<int, List<Rectangle>> dicRectList, OptionType optionType = OptionType.Single)
+        public CVArea(Rectangle area, Dictionary<int, List<Rectangle>> dicRectList, OptionType optionType = OptionType.Single,string name="")
         {
             this.Area = area;
             this.OptionType = OptionType;
-            //this.Name = name;
+            this.Name = name;
             this.SetQuestionList(dicRectList);
             this.dicRectList = dicRectList;
         }
         public Rectangle Area { get; private set; }
-        //public string Name { get; private set; }
+        public string Name { get; private set; }
         public OptionType OptionType { get; private set; }
         public List<CVQuestion> CVQuestionList { get; private set; }
         public void SetQuestionList(Dictionary<int, List<Rectangle>> dicRectList)
@@ -41,48 +41,60 @@ namespace EmguTest.Service
         public void Recognition(Image<Gray, byte> src, int myThreshold = 180)
         {
 
-            //思路：第一次正常识别--->初步智能筛选---->再次智能筛选
-            //var src = new Image<Gray, byte>(bitmap);
+            ////思路：第一次正常识别--->初步智能筛选---->再次智能筛选
+            ////var src = new Image<Gray, byte>(bitmap);
 
-            var thresholdMat = src.CopyBlank().Mat;
+            //var thresholdMat = src.CopyBlank().Mat;
 
-            CvInvoke.Threshold(src, thresholdMat, myThreshold, 255, Emgu.CV.CvEnum.ThresholdType.BinaryInv);
+            //CvInvoke.Threshold(src, thresholdMat, myThreshold, 255, Emgu.CV.CvEnum.ThresholdType.BinaryInv);
 
-            //new CommonUse().SaveMat(thresholdImage.Mat, "二值化hou");
-            //思路 open -膨胀
-            //形态学膨胀
-            Mat mat_dilate = CommonUse.MyDilateS(thresholdMat, Emgu.CV.CvEnum.MorphOp.Open);
+            ////new CommonUse().SaveMat(thresholdImage.Mat, "二值化hou");
+            ////思路 open -膨胀
+            ////形态学膨胀
+            //Mat mat_dilate = CommonUse.MyDilateS(thresholdMat, Emgu.CV.CvEnum.MorphOp.Open);
+            ////new CommonUse().SaveMat(mat_dilate, "Open行学");
+            //mat_dilate = CommonUse.MyDilateS(mat_dilate, Emgu.CV.CvEnum.MorphOp.Dilate);
             //new CommonUse().SaveMat(mat_dilate, "Open行学");
-            mat_dilate = CommonUse.MyDilateS(mat_dilate, Emgu.CV.CvEnum.MorphOp.Dilate);
-            new CommonUse().SaveMat(mat_dilate, "Open行学");
 
             foreach (var question in this.CVQuestionList)
             {
                 for (int i = 0; i < question.OptionRectList.Count; i++)
                 {
                     var cvRect = question.OptionRectList[i];
-                    var tmpRect = cvRect.Rectangle;
-                    var newRect = new Rectangle(Math.Max(0, tmpRect.X), Math.Max(0, tmpRect.Y), tmpRect.Width, tmpRect.Height);
-                    using (var tmpImage = new Mat(mat_dilate, newRect).ToImage<Gray, byte>())
+                    //计算平均灰度值
+                    var fileName = $"{this.Name}第";
+                    cvRect.CalVagGrayValue(src);
+
+                    //var tmpRect = cvRect.Rectangle;
+                    //var newRect = new Rectangle(Math.Max(0, tmpRect.X), Math.Max(0, tmpRect.Y), tmpRect.Width, tmpRect.Height);
+                    //using (var tmpImage = new Mat(mat_dilate, newRect).ToImage<Gray, byte>())
+                    //{
+                    //    var result = CommonUse.GetWhiteColorPercenterS(tmpImage);
+                    //    cvRect.AreaPercent = result;
+                    //    //cvRect.IsAnwser = result > 0.3;
+                    //    if (result > 0.3)
+                    //    {
+                    //        question.Results.Add(i);
+                    //    }
+                    //    //Console.WriteLine($"白色所占比：{result}");
+                    //}
+
+                    //计算面积比
+                    cvRect.CalAreaPercent(src);
+                    if (cvRect.AreaPercent > 0.3)
                     {
-                        var result = CommonUse.GetWhiteColorPercenterS(tmpImage);
-                        cvRect.AreaPercent = result;
-                        //cvRect.IsAnwser = result > 0.3;
-                        if (result > 0.3)
-                        {
-                            question.Results.Add(i);
-                        }
-                        //Console.WriteLine($"白色所占比：{result}");
+                        question.Results.Add(i);
                     }
+                   
                 }
 
             }
             //打印初步识别的
-            new CommonUse().DrawRectCircleAndSave(src.Mat.Clone(), this.GetRectList(), "初步识别的",points: this.GetResultPointList(false));
+            new CommonUse().DrawRectCircleAndSave(src.Mat.Clone(), this.GetRectList(), $"{this.Name}-初步识别的",points: this.GetResultPointList(false));
 
             //初步筛选
             this.Check();
-            new CommonUse().DrawRectCircleAndSave(src.Mat.Clone(), this.GetRectList(), "初步筛选的", points: this.GetResultPointList(false));
+            new CommonUse().DrawRectCircleAndSave(src.Mat.Clone(), this.GetRectList(), $"{this.Name}-初步筛选的", points: this.GetResultPointList(false));
 
             //再次智能处理异常的
             this.CVQuestionList.ForEach(q =>
@@ -164,30 +176,31 @@ namespace EmguTest.Service
             int disThreshold = question.ResultStatus == QuestionResultStatus.Absence ? stepThreshold+10 : -stepThreshold;
             int currentThreshold = defatulThreshold + disThreshold;
 
-            var optionList = question.NewOptionList();
+            var optionList = question.NewOptionList(currentThreshold);
             //优化求结果和面积比
             for (int i = 0; i < optionList.Count; i++)
             {
                 var currentCvRect = optionList[i];
+                currentCvRect.CalAreaPercent(src);
 
-                using (var optionRectImage = src.Copy(currentCvRect.Rectangle))
-                {
-                    new CommonUse().SaveMat(optionRectImage.Mat, "异常选项原图");
-                    var thresholdMat = optionRectImage.CopyBlank().Mat;
+                //using (var optionRectImage = src.Copy(currentCvRect.Rectangle))
+                //{
+                //    new CommonUse().SaveMat(optionRectImage.Mat, "异常选项原图");
+                //    var thresholdMat = optionRectImage.CopyBlank().Mat;
 
-                    CvInvoke.Threshold(optionRectImage, thresholdMat, currentThreshold, 255, Emgu.CV.CvEnum.ThresholdType.BinaryInv);
+                //    CvInvoke.Threshold(optionRectImage, thresholdMat, currentThreshold, 255, Emgu.CV.CvEnum.ThresholdType.BinaryInv);
 
-                    Mat mat_dilate = CommonUse.MyDilateS(thresholdMat, Emgu.CV.CvEnum.MorphOp.Open);
-                    mat_dilate = CommonUse.MyDilateS(mat_dilate, Emgu.CV.CvEnum.MorphOp.Dilate);
-                    new CommonUse().SaveMat(mat_dilate, "异常选项原图行学后");
+                //    Mat mat_dilate = CommonUse.MyDilateS(thresholdMat, Emgu.CV.CvEnum.MorphOp.Open);
+                //    mat_dilate = CommonUse.MyDilateS(mat_dilate, Emgu.CV.CvEnum.MorphOp.Dilate);
+                //    new CommonUse().SaveMat(mat_dilate, "异常选项原图行学后");
 
-                    currentCvRect.AreaPercent = CommonUse.GetWhiteColorPercenterS(mat_dilate.ToImage<Gray, byte>());
-                    //if (currentCvRect.AreaPercent > 0.3)
-                    //{
-                    //    question.Results.Add(i);
-                    //}
+                //    currentCvRect.AreaPercent = CommonUse.GetWhiteColorPercenterS(mat_dilate.ToImage<Gray, byte>());
+                //    //if (currentCvRect.AreaPercent > 0.3)
+                //    //{
+                //    //    question.Results.Add(i);
+                //    //}
 
-                }
+                //}
             }
 
             question.IntelligentChose(optionList);
@@ -355,12 +368,12 @@ namespace EmguTest.Service
             this.Results = this.Results.Intersect(newResults).ToList();
             //this.Results = newResults;
         }
-        public List<CVRectangle> NewOptionList()
+        public List<CVRectangle> NewOptionList(int threshold)
         {
             List<CVRectangle> newOptions = new List<CVRectangle>();
             this.OptionRectList.ForEach(o =>
             {
-                newOptions.Add(new CVRectangle(o.Rectangle));
+                newOptions.Add(new CVRectangle(o.Rectangle) { Threshold=threshold});
             });
             return newOptions;
         }
@@ -385,6 +398,9 @@ namespace EmguTest.Service
         }
         public Rectangle Rectangle { get; private set; }
         public double AreaPercent { get; set; }
+        public double AvgGrayValue { get; private set; }
+        public Dictionary<int, int> HistDic { get; private set; } = new Dictionary<int, int>();
+        public int Threshold { get; set; } = CVArea.defatulThreshold;
         //public bool IsAnwser { get; set; }
 
         public static List<CVRectangle> NewList(List<Rectangle> rectList, Point offset)
@@ -397,6 +413,66 @@ namespace EmguTest.Service
             });
 
             return cVRectangles;
+        }
+
+        /// <summary>
+        /// 计算占用比
+        /// </summary>
+        /// <param name="image">所在区域的图片</param>
+        public void CalAreaPercent(Image<Gray,byte> image, string saveName="")
+        {
+
+            var newRect = new Rectangle(Math.Max(0, this.Rectangle.X), Math.Max(0, this.Rectangle.Y), this.Rectangle.Width, this.Rectangle.Height);
+            using (var optionRectImage = image.Copy(newRect))
+            {
+                var thresholdMat = optionRectImage.CopyBlank().Mat;
+
+                CvInvoke.Threshold(optionRectImage, thresholdMat, this.Threshold, 255, Emgu.CV.CvEnum.ThresholdType.BinaryInv);
+
+                Mat mat_dilate = CommonUse.MyDilateS(thresholdMat, Emgu.CV.CvEnum.MorphOp.Open);
+                mat_dilate = CommonUse.MyDilateS(mat_dilate, Emgu.CV.CvEnum.MorphOp.Dilate);
+                new CommonUse().SaveMat(mat_dilate, $"异常选项原图行学后-{saveName}");
+
+                this.AreaPercent = CommonUse.GetWhiteColorPercenterS(mat_dilate.ToImage<Gray, byte>());
+                //Console.WriteLine($"白色所占比：{this.AreaPercent}");
+
+            }
+            
+        }
+
+        /// <summary>
+        /// 计算平均灰度
+        /// </summary>
+        /// <param name="img">所在区域的图片</param>
+        public void CalVagGrayValue(Image<Gray,byte> img, string saveName = "")
+        {
+            var newRect = new Rectangle(Math.Max(0, this.Rectangle.X), Math.Max(0, this.Rectangle.Y), this.Rectangle.Width, this.Rectangle.Height);
+
+            List<int> grayValueList = new List<int>();
+            using (var tmpImage = img.Copy(newRect))
+            {
+                var size = tmpImage.Size;
+                for (int i = 0; i < size.Height; i++)
+                {
+                    for (int j = 0; j < size.Width; j++)
+                    {
+                        var tmpValue = tmpImage.Data[i, j, 0];
+                        grayValueList.Add(tmpValue);
+                        if (this.HistDic.ContainsKey(tmpValue))
+                        {
+                            this.HistDic[tmpValue] += 1;
+
+                        }
+                        else
+                        {
+                            this.HistDic[tmpValue] = 1;
+                        }
+
+                    }
+                }
+            }
+            this.AvgGrayValue = grayValueList.Average();
+            Console.WriteLine(this.AvgGrayValue);
         }
 
     }
