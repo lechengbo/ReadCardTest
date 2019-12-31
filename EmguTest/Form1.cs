@@ -694,7 +694,7 @@ namespace EmguTest
                     r.Offset(destRect.Location);
                     rectList.Add(r);
                 });
-                CVArea area = new CVArea(this.destRect, commonUse.OrderRectList(rectList, IsFillFull: false));
+                CVArea area = new CVArea(this.destRect, commonUse.OrderRectList(rectList, IsFillFull: false),name:"测试卷");
                 centerList = commonUse.GetCenterPointListFromBitmapByWhiteArea(this.ib_original.Image.Bitmap, new List<CVArea>() { area });
 
                 Mat tmpMat = new Image<Bgr, byte>(this.ib_original.Image.Bitmap).Mat;

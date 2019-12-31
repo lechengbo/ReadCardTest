@@ -1,6 +1,8 @@
 ﻿using Emgu.CV;
 using Emgu.CV.CvEnum;
+using Emgu.CV.Stitching;
 using Emgu.CV.Structure;
+using Emgu.CV.Util;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -63,7 +65,7 @@ namespace EmguTest.Service
                     var cvRect = question.OptionRectList[i];
                     //计算平均灰度值
                     var fileName = $"{this.Name}第";
-                    cvRect.CalVagGrayValue(src);
+                    cvRect.CalVagGrayValueAndHist(src);
 
                     //var tmpRect = cvRect.Rectangle;
                     //var newRect = new Rectangle(Math.Max(0, tmpRect.X), Math.Max(0, tmpRect.Y), tmpRect.Width, tmpRect.Height);
@@ -90,11 +92,11 @@ namespace EmguTest.Service
 
             }
             //打印初步识别的
-            new CommonUse().DrawRectCircleAndSave(src.Mat.Clone(), this.GetRectList(), $"{this.Name}-初步识别的",points: this.GetResultPointList(false));
-
+            //new CommonUse().DrawRectCircleAndSave(src.Mat.Clone(), this.GetRectList(), $"{this.Name}-初步识别的", -this.Area.X, -this.Area.Y, points: this.GetResultPointList(false));
+            this.DrawDetail(src.Clone(),this.Name);
             //初步筛选
             this.Check();
-            new CommonUse().DrawRectCircleAndSave(src.Mat.Clone(), this.GetRectList(), $"{this.Name}-初步筛选的", points: this.GetResultPointList(false));
+            new CommonUse().DrawRectCircleAndSave(src.Mat.Clone(), this.GetRectList(false), $"{this.Name}-初步筛选结果", points: this.GetResultPointList(false));
 
             //再次智能处理异常的
             this.CVQuestionList.ForEach(q =>
@@ -148,13 +150,20 @@ namespace EmguTest.Service
             
             return centerPoints;
         }
-        public List<Rectangle> GetRectList()
+        public List<Rectangle> GetRectList(bool needOffset = true)
         {
             List<Rectangle> list = new List<Rectangle>();
-            foreach (var item in this.dicRectList.Values)
+            this.CVQuestionList.ForEach(q =>
             {
-                list.AddRange(item);
-            };
+                q.OptionRectList.ForEach(cvr =>
+                {
+                    var r = cvr.Rectangle;
+                    if (needOffset) r.Offset(this.Area.Location);
+                    list.Add(r);
+                });
+
+            });
+
             return list;
             
         }
@@ -173,7 +182,7 @@ namespace EmguTest.Service
                 return;
             }
 
-            int disThreshold = question.ResultStatus == QuestionResultStatus.Absence ? stepThreshold+10 : -stepThreshold;
+            int disThreshold = question.ResultStatus == QuestionResultStatus.Absence ? stepThreshold  : -stepThreshold;
             int currentThreshold = defatulThreshold + disThreshold;
 
             var optionList = question.NewOptionList(currentThreshold);
@@ -208,7 +217,52 @@ namespace EmguTest.Service
 
         }
 
+        public void DrawDetail(Image<Gray, byte> image, string fileName="")
+        {
+            var colorMat = image.Convert<Bgr, byte>().Mat;
+            new CommonUse().DrawRectCircleAndSave(colorMat, this.GetRectList(false), $"{this.Name}-标准识别结果",  points: this.GetResultPointList(false));
 
+            var fontMat=Mat.Ones(colorMat.Rows*2+30 , colorMat.Cols*2, colorMat.Depth, colorMat.NumberOfChannels);
+            var percentMat = Mat.Ones(colorMat.Rows * 2 + 30, colorMat.Cols * 2, colorMat.Depth, colorMat.NumberOfChannels);
+            this.CVQuestionList.ForEach(q =>
+            {
+                q.OptionRectList.ForEach(o =>
+                {
+                    CvInvoke.PutText(fontMat, o.AvgGrayValue.ToString("f2"),new Point(o.Rectangle.Location.X*2, o.Rectangle.Location.Y*2+o.Rectangle.Height), FontFace.HersheySimplex, 0.4, new MCvScalar(255, 255, 255));
+                    CvInvoke.PutText(fontMat, "Average Gray Value ", new Point(6, fontMat.Height - 30), FontFace.HersheySimplex, 0.6, new MCvScalar(255, 255, 255));
+                    //面积咱比显示
+                    CvInvoke.PutText(percentMat, o.AreaPercent.ToString("f2"), new Point(o.Rectangle.Location.X * 2, o.Rectangle.Location.Y * 2+o.Rectangle.Height), FontFace.HersheySimplex, 0.4, new MCvScalar(255, 255, 255));
+                    CvInvoke.PutText(percentMat, "After  MorphOperated,the percent of area ", new Point(6, fontMat.Height - 30), FontFace.HersheySimplex, 0.6, new MCvScalar(255, 255, 255));
+                });
+            });
+            //VectorOfMat matList = new VectorOfMat(colorMat, fontMat);
+            //var mergeMat = new Mat();// Mat.Ones(colorMat.Rows*2, colorMat.Cols*2, colorMat.Depth, colorMat.NumberOfChannels); ;
+            //CvInvoke.Add( fontMat, fontMat,mergeMat);
+            
+            new CommonUse().SaveMat(fontMat, $"{this.Name}-区域各平均灰度详细");
+            new CommonUse().SaveMat(percentMat, $"{this.Name}-标准阀门值180后面积占比");
+
+        }
+        public void DrawDetail(Image<Gray, byte> image,int grayValue, string fileName = "")
+        {
+            var colorMat = image.Convert<Bgr, byte>().Mat;
+            
+            var fontMat = Mat.Ones(colorMat.Rows * 2 + 30, colorMat.Cols * 2, colorMat.Depth, colorMat.NumberOfChannels);
+            this.CVQuestionList.ForEach(q =>
+            {
+                q.OptionRectList.ForEach(o =>
+                {
+                    CvInvoke.PutText(fontMat,o.GetHistPercentLessThan(grayValue).ToString("f2"), new Point(o.Rectangle.Location.X * 2, o.Rectangle.Location.Y * 2+o.Rectangle.Height), FontFace.HersheySimplex, 0.4, new MCvScalar(255, 255, 255));
+                    CvInvoke.PutText(fontMat, $"The Percent Of Less than {grayValue} ", new Point(6, fontMat.Height - 30), FontFace.HersheySimplex, 0.4, new MCvScalar(255, 255, 255));
+                });
+            });
+            //VectorOfMat matList = new VectorOfMat(colorMat, fontMat);
+            //var mergeMat = new Mat();// Mat.Ones(colorMat.Rows*2, colorMat.Cols*2, colorMat.Depth, colorMat.NumberOfChannels); ;
+            //CvInvoke.Add( fontMat, fontMat,mergeMat);
+
+            new CommonUse().SaveMat(fontMat, $"{fileName}-灰度小于{grayValue}统计");
+
+        }
 
     }
 
@@ -264,7 +318,7 @@ namespace EmguTest.Service
         }
 
         /// <summary>
-        /// 没有选中的，取面积最大的，并大于0.18的
+        /// 没有选中的，取面积最大的，并大于0.18的,或者平均灰度230以下的在0.9以上，
         /// </summary>
         /// <param name="optionType"></param>
         /// <returns></returns>
@@ -272,11 +326,23 @@ namespace EmguTest.Service
         {
             List<int> results = new List<int>();
 
-            this.OptionRectList.Where(r => r.AreaPercent >= CVQuestion.lowestAreaPercent)?.ToList().ForEach(r =>
+            for (int i = 0; i < this.OptionRectList.Count; i++)
             {
-                int index = this.OptionRectList.IndexOf(r);
-                results.Add(index);
-            });
+                var r = this.OptionRectList[i];
+                if (r.IsUnchanged())
+                {
+                    continue;
+                }else if(r.GetHistPercentLessThan(230) >= 0.9)
+                {
+                    results.Add(i);
+                    continue;
+                }else if(r.AreaPercent < CVQuestion.lowestAreaPercent)
+                {
+                    continue;
+                }
+                    results.Add(i);
+            }
+            
 
             if (results.Count <= 1 || optionType == OptionType.Multi)
             {
@@ -291,7 +357,7 @@ namespace EmguTest.Service
         }
 
         /// <summary>
-        /// 单选中多选的，去掉小于最大面积0.3的，，多选，去掉小于最大面积0.4的
+        /// 单选中多选的，去掉小于最大面积0.3的，，多选，去掉小于最大面积0.4的,180的面积占0.5以上算
         /// </summary>
         /// <param name="optionType"></param>
         /// <returns></returns>
@@ -301,10 +367,15 @@ namespace EmguTest.Service
             var maxPercent = this.OptionRectList.Select(o => o.AreaPercent).Max();
             var lowestPercent = maxPercent - disAreaPercent;
             lowestPercent = Math.Max(lowestPercent, lowestAreaPercent);
+            lowestPercent = Math.Min(lowestPercent, 0.5);
 
             var results = new List<int>();
             for (int i = 0; i < this.OptionRectList.Count; i++)
             {
+                if (this.OptionRectList[i].IsUnchanged())
+                {
+                    continue;
+                }
                 if (this.OptionRectList[i].AreaPercent >= lowestPercent)
                 {
                     results.Add(i);
@@ -326,12 +397,16 @@ namespace EmguTest.Service
         }
         private void IntelligentChoseByAbsence(List<CVRectangle> otherOptionList)
         {
-            //挑选两次面积和最大的，并且必须大于0.3
+            //挑选两次面积和最大的，并且必须大于0.4
             int count = Math.Min(this.OptionRectList.Count, otherOptionList.Count);
             int maxIndex = 0;
             double maxPercent = 0;
             for (int i = 0; i < count; i++)
             {
+                if (this.OptionRectList[i].IsUnchanged())
+                {
+                    continue;
+                }
                 var currentIndex = i;
                 var currentPercent = this.OptionRectList[i].AreaPercent + otherOptionList[i].AreaPercent;
                 if (currentPercent > maxPercent)
@@ -341,7 +416,7 @@ namespace EmguTest.Service
                 }
             }
 
-            if (maxPercent > 0.3)
+            if (maxPercent > 0.4)
             {
                 this.Results = new List<int>() { maxIndex };
             }
@@ -349,21 +424,33 @@ namespace EmguTest.Service
         }
         private void IntelligentChoseByMulti(List<CVRectangle> otherOptionList)
         {
-            //挑选两次面积和最大的，挑选面积最大的和她0.5以内的
+            //挑选两次面积和最大的，挑选面积最大的和她0.5以内的或者平均灰度在170一下的
+            var newResults = new List<int>();
             List<double> percentSumList = new List<double>();
             int count = Math.Min(this.OptionRectList.Count, otherOptionList.Count);
             for (int i = 0; i < count; i++)
             {
+                
                 var currentSum = this.OptionRectList[i].AreaPercent + otherOptionList[i].AreaPercent;
+                
                 percentSumList.Add(currentSum);
             }
             double maxPercent = percentSumList.Max();
 
-            var newResults = new List<int>();
-            percentSumList.Where(p => maxPercent - p < 0.5).ToList().ForEach(p =>
+            
+            for (int i = 0; i < percentSumList.Count; i++)
             {
-                newResults.Add(percentSumList.IndexOf(p));
-            });
+                var r = this.OptionRectList[i];
+                if (r.IsUnchanged())
+                {
+                    continue;
+                }
+                if (maxPercent - percentSumList[i] < 0.5 || r.GetHistPercentLessThan(220)>0.8)
+                {
+                    newResults.Add(i);
+                }
+            }
+           
             //求交集
             this.Results = this.Results.Intersect(newResults).ToList();
             //this.Results = newResults;
@@ -399,7 +486,7 @@ namespace EmguTest.Service
         public Rectangle Rectangle { get; private set; }
         public double AreaPercent { get; set; }
         public double AvgGrayValue { get; private set; }
-        public Dictionary<int, int> HistDic { get; private set; } = new Dictionary<int, int>();
+        public List<int> HistDic { get; private set; } = new List<int>();
         public int Threshold { get; set; } = CVArea.defatulThreshold;
         //public bool IsAnwser { get; set; }
 
@@ -431,7 +518,7 @@ namespace EmguTest.Service
 
                 Mat mat_dilate = CommonUse.MyDilateS(thresholdMat, Emgu.CV.CvEnum.MorphOp.Open);
                 mat_dilate = CommonUse.MyDilateS(mat_dilate, Emgu.CV.CvEnum.MorphOp.Dilate);
-                new CommonUse().SaveMat(mat_dilate, $"异常选项原图行学后-{saveName}");
+                //new CommonUse().SaveMat(mat_dilate, $"异常选项原图行学后-{saveName}");
 
                 this.AreaPercent = CommonUse.GetWhiteColorPercenterS(mat_dilate.ToImage<Gray, byte>());
                 //Console.WriteLine($"白色所占比：{this.AreaPercent}");
@@ -444,7 +531,7 @@ namespace EmguTest.Service
         /// 计算平均灰度
         /// </summary>
         /// <param name="img">所在区域的图片</param>
-        public void CalVagGrayValue(Image<Gray,byte> img, string saveName = "")
+        public void CalVagGrayValueAndHist(Image<Gray,byte> img, string saveName = "")
         {
             var newRect = new Rectangle(Math.Max(0, this.Rectangle.X), Math.Max(0, this.Rectangle.Y), this.Rectangle.Width, this.Rectangle.Height);
 
@@ -458,21 +545,51 @@ namespace EmguTest.Service
                     {
                         var tmpValue = tmpImage.Data[i, j, 0];
                         grayValueList.Add(tmpValue);
-                        if (this.HistDic.ContainsKey(tmpValue))
-                        {
-                            this.HistDic[tmpValue] += 1;
-
-                        }
-                        else
-                        {
-                            this.HistDic[tmpValue] = 1;
-                        }
-
+                       
                     }
                 }
             }
+
+            this.HistDic = grayValueList;
             this.AvgGrayValue = grayValueList.Average();
             Console.WriteLine(this.AvgGrayValue);
+        }
+
+        /// <summary>
+        /// 获取小于该灰度值的，也就是黑的占比
+        /// </summary>
+        /// <param name="grayValue"></param>
+        /// <returns></returns>
+        public double GetHistPercentLessThan(int grayValue)
+        {
+            if(grayValue>255 || grayValue < 0)
+            {
+                return 0;
+            }
+
+            int total = 0;
+            int lessThanGray = 0;
+            foreach (var item in this.HistDic)
+            {
+                total += item;
+                if (item <= grayValue)
+                {
+                    lessThanGray += item;
+                }
+            }
+
+            return lessThanGray * 1.0 / total;
+        }
+
+        /// <summary>
+        /// 是否为涂改，或者涂改的很小
+        /// 平均灰度大于210或203就是空白的，没有涂的
+        ///230灰度的以上的超过0.3就是空白
+        /// </summary>
+        /// <returns></returns>
+        public bool IsUnchanged()
+        {
+            return this.AvgGrayValue > 203 || this.GetHistPercentLessThan(230) < 0.7;
         }
 
     }

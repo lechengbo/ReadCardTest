@@ -254,10 +254,10 @@ namespace EmguTest
 
             return bigRect;
         }
-        public List<Rectangle> Reduce(List<Rectangle> rectList,int inflateW=-1,int inflateH=-1)
+        public List<Rectangle> Reduce(List<Rectangle> rectList, int inflateW = -1, int inflateH = -1)
         {
             List<Rectangle> list = new List<Rectangle>();
-           
+
             rectList.ForEach(r =>
             {
                 r.Inflate(inflateW, inflateH);
@@ -376,7 +376,7 @@ namespace EmguTest
 
                 }
                 //缩小
-                originalRectList= Reduce(originalRectList);
+                originalRectList = Reduce(originalRectList);
 
                 return originalRectList;
             }
@@ -496,7 +496,7 @@ namespace EmguTest
                 SaveMat(mat, "原始");
                 DrawRectCircleAndSave(mat, originalRectList, "填充优化后的矩形框");
 
-                
+
                 return originalRectList;
             }
         }
@@ -772,24 +772,52 @@ namespace EmguTest
                 using (var copy = src.Copy(a.Area))
                 {
                     a.Recognition(copy);
-                    
+
                 }
             });
 
 
             List<Point> centerPointList = new List<Point>();
-            List<Rectangle> rectList = new List<Rectangle>();
+            //List<Rectangle> rectList = new List<Rectangle>();
             cVAreaList.ForEach(a =>
             {
                 centerPointList.AddRange(a.GetResultPointList());
-                rectList.AddRange(a.GetRectList());
+                //rectList.AddRange(a.GetRectList());
             });
             //保存原图和识别的中心点结果
-            SaveMat(src.Mat, "原图");
-            DrawRectCircleAndSave(src.Mat, rectList, $"原图识别结果-智能识别", points: centerPointList);
+            //SaveMat(src.Mat, "原图");
+            //DrawRectCircleAndSave(src.Mat, rectList, $"原图识别结果-智能识别", points: centerPointList);
+
+            //画出各种灰度的占比
+            List<int> grayValueList = new List<int>() { 240, 230, 200, 180, 160,100 };
+            cVAreaList.ForEach(a =>
+            {
+                //画出框和最终识别结果
+                List<Point> tempCenterPointList = new List<Point>();
+                List<Rectangle> tempRectList = new List<Rectangle>();
+                using (var copy = src.Copy(a.Area))
+                {
+                    tempRectList.AddRange(a.GetRectList(false));
+
+                    DrawRectCircleAndSave(copy.Mat, a.GetRectList(false), $"{a.Name}-最终识别结果", points: a.GetResultPointList(false));
+                }
+
+                grayValueList.ForEach(grayValue =>
+                {
+                    using (var copy = src.Copy(a.Area))
+                    {
+                        a.DrawDetail(copy, grayValue, a.Name);
+
+                    }
+
+                });
+
+            });
 
             return centerPointList;
         }
+
+
 
 
         /// <summary>
@@ -823,7 +851,7 @@ namespace EmguTest
             List<Rectangle> validRectList = new List<Rectangle>();
             rectList.ForEach(rect =>
             {
-                var newRect = new Rectangle( Math.Max(0, rect.X),  Math.Max(0, rect.Y), rect.Width, rect.Height);
+                var newRect = new Rectangle(Math.Max(0, rect.X), Math.Max(0, rect.Y), rect.Width, rect.Height);
                 var tmpImage = image_dilate.Copy(newRect);
 
                 var result = GetWhiteColorPercenter(tmpImage);
@@ -917,7 +945,7 @@ namespace EmguTest
                 if (item.Y > (sourceList[i - 1].Y + sourceList[i - 1].Height))
                 {
                     rowNum++;
-                    
+
                     tmpRectList = new List<Rectangle>();
                     tmpRectList.Add(item);
                     pairs.Add(rowNum, tmpRectList);
@@ -1507,7 +1535,7 @@ namespace EmguTest
             //CvInvoke.MorphologyEx(mat, mat_dilate, morphop, struct_element, new Point(-1, -1), 1,
             //    Emgu.CV.CvEnum.BorderType.Default, new MCvScalar(255, 0, 0, 255));//形态学膨胀
 
-            return MyDilateS(mat,morphop);
+            return MyDilateS(mat, morphop);
         }
 
         public static Mat MyDilateS(Mat mat, MorphOp morphop = MorphOp.Dilate)
