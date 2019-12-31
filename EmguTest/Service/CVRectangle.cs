@@ -58,6 +58,9 @@ namespace EmguTest.Service
             //mat_dilate = CommonUse.MyDilateS(mat_dilate, Emgu.CV.CvEnum.MorphOp.Dilate);
             //new CommonUse().SaveMat(mat_dilate, "Open行学");
 
+            //补充偏移置换
+            src = Max(src);
+
             foreach (var question in this.CVQuestionList)
             {
                 for (int i = 0; i < question.OptionRectList.Count; i++)
@@ -105,6 +108,77 @@ namespace EmguTest.Service
             });
 
 
+        }
+
+        /// <summary>
+        /// 上下左右4分之一取最大
+        /// </summary>
+        /// <param name="image"></param>
+        /// <returns></returns>
+        private Image<Gray,byte> Max(Image<Gray,byte> image)
+        {
+            int maxX = image.Width, maxY = image.Height;
+            this.CVQuestionList.ForEach(q =>
+            {
+                q.OptionRectList.ForEach(o =>
+                {
+                    int width = o.Rectangle.Width, height = o.Rectangle.Height;
+                    int startX = o.Rectangle.X, startY = o.Rectangle.Y,
+                    endX = startX +width, endY = startY + height,
+                    maxExtensionDisX = width / 4, maxExtensionDisY = height / 4;
+                    
+                    //上下端
+                    for (int x = startX; x < endX; x++)
+                    {
+                        //上端
+                        for (int y = startY,oppositeY = y + height; y < startY+maxExtensionDisY && oppositeY<maxY; y++)
+                        {
+                            SetMaxColor(image, x, y, x,oppositeY);
+                        }
+                        //下端
+                        for (int y = endY - maxExtensionDisY, oppositeY = y - height; y < endY; y++)
+                        {
+                            if (oppositeY < 0)
+                            {
+                                continue;
+                            }
+                            SetMaxColor(image, x, y, x, oppositeY);
+                            //var val1 = image.Data[x, y, 0];
+                            //var val2 = image.Data[x, oppositeY, 0];
+                            //image.Data[x, y, 0] = Math.Min(val1, val2);
+                        }
+
+                    }
+                    //左右端
+                    for (int y = startY; y < endY; y++)
+                    {
+                        //左端
+                        for (int x = startX,oppositeX=x+width; x < startX+maxExtensionDisX && oppositeX<maxX; x++)
+                        {
+                            SetMaxColor(image, x, y, oppositeX, y);
+                        }
+                        //右端
+                        for (int x = endX-maxExtensionDisX,oppositeX=x-width; x < endX; x++)
+                        {
+                            if (oppositeX < 0)
+                            {
+                                continue;
+                            }
+                            SetMaxColor(image, x, y, oppositeX, y);
+                        }
+                    }
+                   
+                    
+                });
+            });
+            return image;
+        }
+
+        private static void SetMaxColor(Image<Gray, byte> image, int x, int y, int oppositeX, int oppositeY)
+        {
+            var val1 = image.Data[y, x, 0];
+            var val2 = image.Data[oppositeY, oppositeX, 0];
+            image.Data[y, x, 0] = Math.Min(val1, val2);
         }
 
         /// <summary>
@@ -397,7 +471,7 @@ namespace EmguTest.Service
         }
         private void IntelligentChoseByAbsence(List<CVRectangle> otherOptionList)
         {
-            //挑选两次面积和最大的，并且必须大于0.4
+            //挑选两次面积和最大的，并且必须大于0.5,且第二次大于0.5
             int count = Math.Min(this.OptionRectList.Count, otherOptionList.Count);
             int maxIndex = 0;
             double maxPercent = 0;
@@ -416,7 +490,7 @@ namespace EmguTest.Service
                 }
             }
 
-            if (maxPercent > 0.4)
+            if (maxPercent > 0.6 && otherOptionList[maxIndex].AreaPercent>0.5)
             {
                 this.Results = new List<int>() { maxIndex };
             }
@@ -455,6 +529,7 @@ namespace EmguTest.Service
             this.Results = this.Results.Intersect(newResults).ToList();
             //this.Results = newResults;
         }
+
         public List<CVRectangle> NewOptionList(int threshold)
         {
             List<CVRectangle> newOptions = new List<CVRectangle>();
@@ -583,13 +658,13 @@ namespace EmguTest.Service
 
         /// <summary>
         /// 是否为涂改，或者涂改的很小
-        /// 平均灰度大于210或203就是空白的，没有涂的
-        ///230灰度的以上的超过0.3就是空白
+        /// 平均灰度大于210或200就是空白的，没有涂的
+        ///230灰度的以上的超过0.21就是空白
         /// </summary>
         /// <returns></returns>
         public bool IsUnchanged()
         {
-            return this.AvgGrayValue > 203 || this.GetHistPercentLessThan(230) < 0.7;
+            return this.AvgGrayValue > 200 || this.GetHistPercentLessThan(230) < 0.79;
         }
 
     }

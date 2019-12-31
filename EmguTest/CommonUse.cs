@@ -789,7 +789,7 @@ namespace EmguTest
             //DrawRectCircleAndSave(src.Mat, rectList, $"原图识别结果-智能识别", points: centerPointList);
 
             //画出各种灰度的占比
-            List<int> grayValueList = new List<int>() { 240, 230, 200, 180, 160,100 };
+            List<int> grayValueList = new List<int>() { 220, 230, 200, 180, 160,100 };
             cVAreaList.ForEach(a =>
             {
                 //画出框和最终识别结果
