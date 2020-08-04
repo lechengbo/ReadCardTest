@@ -9,6 +9,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmguTest", "EmguTest\EmguTe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "yue-juan-care.customerControl", "yue-juan-care.customerControl\yue-juan-care.customerControl.csproj", "{D16DDE6E-4E55-488D-A126-A4937A4C5493}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TensorFlowTest", "TensorFlowTest\TensorFlowTest.csproj", "{23DC6F94-6C2F-456D-AC6E-2C655547C1D2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tensorflowapptest", "tensorflowapptest\tensorflowapptest.csproj", "{925E65DB-833A-4E0B-91A7-F5E9D4360F78}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +31,14 @@ Global
 		{D16DDE6E-4E55-488D-A126-A4937A4C5493}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D16DDE6E-4E55-488D-A126-A4937A4C5493}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D16DDE6E-4E55-488D-A126-A4937A4C5493}.Release|Any CPU.Build.0 = Release|Any CPU
+		{23DC6F94-6C2F-456D-AC6E-2C655547C1D2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{23DC6F94-6C2F-456D-AC6E-2C655547C1D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{23DC6F94-6C2F-456D-AC6E-2C655547C1D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{23DC6F94-6C2F-456D-AC6E-2C655547C1D2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{925E65DB-833A-4E0B-91A7-F5E9D4360F78}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{925E65DB-833A-4E0B-91A7-F5E9D4360F78}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{925E65DB-833A-4E0B-91A7-F5E9D4360F78}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{925E65DB-833A-4E0B-91A7-F5E9D4360F78}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

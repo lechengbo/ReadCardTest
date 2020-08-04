@@ -80,7 +80,7 @@ namespace EmguTest
                 return;
             }
 
-            CommonUse commonUse = new CommonUse();
+            CVHelper commonUse = new CVHelper();
 
             var rectList = commonUse.GetRectListFromBitmap(cutedBitmap, Convert.ToInt32(this.minNum.Value), Convert.ToInt32(this.maxNum.Value), 0, 0, true, 2);
 
@@ -186,7 +186,7 @@ namespace EmguTest
 
         private void Btn_regMult_Click(object sender, EventArgs e)
         {
-            CommonUse commonUse = new CommonUse();
+            CVHelper commonUse = new CVHelper();
 
             foreach (var filePath in this.multSelectPicPathList)
             {
@@ -281,7 +281,7 @@ namespace EmguTest
                 return;
             }
 
-            CommonUse commonUse = new CommonUse();
+            CVHelper commonUse = new CVHelper();
 
             var rectList = commonUse.GetRectListFromBitmap(cutedBitmap, Convert.ToInt32(this.minNum.Value), Convert.ToInt32(this.maxNum.Value), 0, 0, false, 0);
 

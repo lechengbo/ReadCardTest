@@ -60,13 +60,19 @@ namespace EmguTest
             this.btn_regBrokenRect = new System.Windows.Forms.Button();
             this.btn_cornerForm = new System.Windows.Forms.Button();
             this.btn_reg2All = new System.Windows.Forms.Button();
+            this.bt_openOcrForm = new System.Windows.Forms.Button();
+            this.bt_openTrainForm = new System.Windows.Forms.Button();
+            this.ck_IsIntell = new System.Windows.Forms.CheckBox();
+            this.btn_ruiHua = new System.Windows.Forms.Button();
             this.ib_middleCut = new Emgu.CV.UI.ImageBox();
             this.ib_result = new Emgu.CV.UI.ImageBox();
             this.ib_middle = new Emgu.CV.UI.ImageBox();
             this.ib_original = new Emgu.CV.UI.ImageBox();
-            this.bt_openOcrForm = new System.Windows.Forms.Button();
-            this.bt_openTrainForm = new System.Windows.Forms.Button();
-            this.ck_IsIntell = new System.Windows.Forms.CheckBox();
+            this.bt_openMachineLearn = new System.Windows.Forms.Button();
+            this.btn_joinTrainData = new System.Windows.Forms.Button();
+            this.bt_openSobelForm = new System.Windows.Forms.Button();
+            this.ckb_ANN = new System.Windows.Forms.CheckBox();
+            this.btnpicMul = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.num_threshold)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.num_Min)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.num_Max)).BeginInit();
@@ -391,6 +397,46 @@ namespace EmguTest
             this.btn_reg2All.UseVisualStyleBackColor = true;
             this.btn_reg2All.Click += new System.EventHandler(this.Btn_reg2All_Click);
             // 
+            // bt_openOcrForm
+            // 
+            this.bt_openOcrForm.Location = new System.Drawing.Point(698, 492);
+            this.bt_openOcrForm.Name = "bt_openOcrForm";
+            this.bt_openOcrForm.Size = new System.Drawing.Size(121, 23);
+            this.bt_openOcrForm.TabIndex = 35;
+            this.bt_openOcrForm.Text = "打开OCR识别窗口";
+            this.bt_openOcrForm.UseVisualStyleBackColor = true;
+            this.bt_openOcrForm.Click += new System.EventHandler(this.Bt_openOcrForm_Click);
+            // 
+            // bt_openTrainForm
+            // 
+            this.bt_openTrainForm.Location = new System.Drawing.Point(698, 541);
+            this.bt_openTrainForm.Name = "bt_openTrainForm";
+            this.bt_openTrainForm.Size = new System.Drawing.Size(121, 23);
+            this.bt_openTrainForm.TabIndex = 36;
+            this.bt_openTrainForm.Text = "打开训练字库窗口";
+            this.bt_openTrainForm.UseVisualStyleBackColor = true;
+            this.bt_openTrainForm.Click += new System.EventHandler(this.Bt_openTrainForm_Click);
+            // 
+            // ck_IsIntell
+            // 
+            this.ck_IsIntell.AutoSize = true;
+            this.ck_IsIntell.Location = new System.Drawing.Point(348, 781);
+            this.ck_IsIntell.Name = "ck_IsIntell";
+            this.ck_IsIntell.Size = new System.Drawing.Size(72, 16);
+            this.ck_IsIntell.TabIndex = 37;
+            this.ck_IsIntell.Text = "是否智能";
+            this.ck_IsIntell.UseVisualStyleBackColor = true;
+            // 
+            // btn_ruiHua
+            // 
+            this.btn_ruiHua.Location = new System.Drawing.Point(33, 744);
+            this.btn_ruiHua.Name = "btn_ruiHua";
+            this.btn_ruiHua.Size = new System.Drawing.Size(75, 23);
+            this.btn_ruiHua.TabIndex = 38;
+            this.btn_ruiHua.Text = "锐化";
+            this.btn_ruiHua.UseVisualStyleBackColor = true;
+            this.btn_ruiHua.Click += new System.EventHandler(this.Btn_ruiHua_Click);
+            // 
             // ib_middleCut
             // 
             this.ib_middleCut.FunctionalMode = Emgu.CV.UI.ImageBox.FunctionalModeOption.PanAndZoom;
@@ -435,41 +481,67 @@ namespace EmguTest
             this.ib_original.MouseMove += new System.Windows.Forms.MouseEventHandler(this.Ib_original_MouseMove);
             this.ib_original.MouseUp += new System.Windows.Forms.MouseEventHandler(this.Ib_original_MouseUp);
             // 
-            // bt_openOcrForm
+            // bt_openMachineLearn
             // 
-            this.bt_openOcrForm.Location = new System.Drawing.Point(698, 492);
-            this.bt_openOcrForm.Name = "bt_openOcrForm";
-            this.bt_openOcrForm.Size = new System.Drawing.Size(121, 23);
-            this.bt_openOcrForm.TabIndex = 35;
-            this.bt_openOcrForm.Text = "打开OCR识别窗口";
-            this.bt_openOcrForm.UseVisualStyleBackColor = true;
-            this.bt_openOcrForm.Click += new System.EventHandler(this.Bt_openOcrForm_Click);
+            this.bt_openMachineLearn.Location = new System.Drawing.Point(698, 584);
+            this.bt_openMachineLearn.Name = "bt_openMachineLearn";
+            this.bt_openMachineLearn.Size = new System.Drawing.Size(121, 23);
+            this.bt_openMachineLearn.TabIndex = 39;
+            this.bt_openMachineLearn.Text = "打开机器学习窗口";
+            this.bt_openMachineLearn.UseVisualStyleBackColor = true;
+            this.bt_openMachineLearn.Click += new System.EventHandler(this.Bt_openMachineLearn_Click);
             // 
-            // bt_openTrainForm
+            // btn_joinTrainData
             // 
-            this.bt_openTrainForm.Location = new System.Drawing.Point(698, 541);
-            this.bt_openTrainForm.Name = "bt_openTrainForm";
-            this.bt_openTrainForm.Size = new System.Drawing.Size(121, 23);
-            this.bt_openTrainForm.TabIndex = 36;
-            this.bt_openTrainForm.Text = "打开训练字库窗口";
-            this.bt_openTrainForm.UseVisualStyleBackColor = true;
-            this.bt_openTrainForm.Click += new System.EventHandler(this.Bt_openTrainForm_Click);
+            this.btn_joinTrainData.Location = new System.Drawing.Point(843, 583);
+            this.btn_joinTrainData.Name = "btn_joinTrainData";
+            this.btn_joinTrainData.Size = new System.Drawing.Size(75, 23);
+            this.btn_joinTrainData.TabIndex = 40;
+            this.btn_joinTrainData.Text = "加入训练数据";
+            this.btn_joinTrainData.UseVisualStyleBackColor = true;
+            this.btn_joinTrainData.Click += new System.EventHandler(this.Btn_joinTrainData_Click);
             // 
-            // ck_IsIntell
+            // bt_openSobelForm
             // 
-            this.ck_IsIntell.AutoSize = true;
-            this.ck_IsIntell.Location = new System.Drawing.Point(348, 781);
-            this.ck_IsIntell.Name = "ck_IsIntell";
-            this.ck_IsIntell.Size = new System.Drawing.Size(72, 16);
-            this.ck_IsIntell.TabIndex = 37;
-            this.ck_IsIntell.Text = "是否智能";
-            this.ck_IsIntell.UseVisualStyleBackColor = true;
+            this.bt_openSobelForm.Location = new System.Drawing.Point(698, 632);
+            this.bt_openSobelForm.Name = "bt_openSobelForm";
+            this.bt_openSobelForm.Size = new System.Drawing.Size(121, 23);
+            this.bt_openSobelForm.TabIndex = 41;
+            this.bt_openSobelForm.Text = "打开边缘检测窗口";
+            this.bt_openSobelForm.UseVisualStyleBackColor = true;
+            this.bt_openSobelForm.Click += new System.EventHandler(this.Bt_openSobelForm_Click);
+            // 
+            // ckb_ANN
+            // 
+            this.ckb_ANN.AutoSize = true;
+            this.ckb_ANN.Location = new System.Drawing.Point(442, 781);
+            this.ckb_ANN.Name = "ckb_ANN";
+            this.ckb_ANN.Size = new System.Drawing.Size(42, 16);
+            this.ckb_ANN.TabIndex = 42;
+            this.ckb_ANN.Text = "ANN";
+            this.ckb_ANN.UseVisualStyleBackColor = true;
+            // 
+            // btnpicMul
+            // 
+            this.btnpicMul.Location = new System.Drawing.Point(698, 687);
+            this.btnpicMul.Name = "btnpicMul";
+            this.btnpicMul.Size = new System.Drawing.Size(121, 23);
+            this.btnpicMul.TabIndex = 43;
+            this.btnpicMul.Text = "打开批量处理窗口";
+            this.btnpicMul.UseVisualStyleBackColor = true;
+            this.btnpicMul.Click += new System.EventHandler(this.btnpicMul_Click);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1727, 835);
+            this.Controls.Add(this.btnpicMul);
+            this.Controls.Add(this.ckb_ANN);
+            this.Controls.Add(this.bt_openSobelForm);
+            this.Controls.Add(this.btn_joinTrainData);
+            this.Controls.Add(this.bt_openMachineLearn);
+            this.Controls.Add(this.btn_ruiHua);
             this.Controls.Add(this.ck_IsIntell);
             this.Controls.Add(this.bt_openTrainForm);
             this.Controls.Add(this.bt_openOcrForm);
@@ -556,6 +628,12 @@ namespace EmguTest
         private Button bt_openOcrForm;
         private Button bt_openTrainForm;
         private CheckBox ck_IsIntell;
+        private Button btn_ruiHua;
+        private Button bt_openMachineLearn;
+        private Button btn_joinTrainData;
+        private Button bt_openSobelForm;
+        private CheckBox ckb_ANN;
+        private Button btnpicMul;
     }
 
 

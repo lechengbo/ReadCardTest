@@ -17,7 +17,7 @@ namespace EmguTest
 {
     public partial class AnwserRegTest : Form
     {
-        private CommonUse common = new CommonUse();
+        private CVHelper common = new CVHelper();
 
         public Bitmap OriginalBitmap { get; set; }
         public Paper ValidatedPaper { get; set; }
@@ -179,17 +179,17 @@ namespace EmguTest
             var rightTopArea = this.OriginalPaper.FixedPoint.RightTop.GetEnlargeOuter();
             var rightTopBitmap = PictureBoxReadCard.Cut(this.OriginalBitmap, rightTopArea);
             var rightTopInner = common.GetBigRectFromBitmap(rightTopBitmap, 500, 6000, rightTopArea.X, rightTopArea.Y);
-            desPoints.Add(CommonUse.PointToPointF(rightTopInner.Location));
+            desPoints.Add(CVHelper.PointToPointF(rightTopInner.Location));
             //右下
             var rightBottomArea = this.OriginalPaper.FixedPoint.RightBottom.GetEnlargeOuter();
             var rightBottomBitmap = PictureBoxReadCard.Cut(this.OriginalBitmap, rightBottomArea);
             var rightBottomInner = common.GetBigRectFromBitmap(rightBottomBitmap, 500, 6000, rightBottomArea.X, rightBottomArea.Y);
-            desPoints.Add(CommonUse.PointToPointF(rightBottomInner.Location));
+            desPoints.Add(CVHelper.PointToPointF(rightBottomInner.Location));
             //左下
             var leftBottomArea = this.OriginalPaper.FixedPoint.LeftBottom.GetEnlargeOuter();
             var leftBottomBitmap = PictureBoxReadCard.Cut(this.OriginalBitmap, leftBottomArea);
             var leftBottomInner = common.GetBigRectFromBitmap(leftBottomBitmap, 500, 6000, leftBottomArea.X, leftBottomArea.Y);
-            desPoints.Add(CommonUse.PointToPointF(leftBottomInner.Location));
+            desPoints.Add(CVHelper.PointToPointF(leftBottomInner.Location));
 
 
 
@@ -230,22 +230,22 @@ namespace EmguTest
             var mat = new Image<Bgr, byte>(this.OriginalBitmap).Mat;
             //通过透视调整大小
             List<PointF> srcPoints = scanPaper.FixedPoint.GetPointsByClockwise();
-            List<PointF> desPoints = new List<PointF>() { CommonUse.PointToPointF(scanPaper.FixedPoint.LeftTop.Inner.Location) };
+            List<PointF> desPoints = new List<PointF>() { CVHelper.PointToPointF(scanPaper.FixedPoint.LeftTop.Inner.Location) };
             //右上
             var rightTopArea = scanPaper.FixedPoint.RightTop.Outer;
             var rightTopBitmap = PictureBoxReadCard.Cut(this.OriginalBitmap, rightTopArea);
             var rightTopInner = common.GetBigRectFromBitmap(rightTopBitmap, 2000, 6000, rightTopArea.X, rightTopArea.Y);
-            desPoints.Add(CommonUse.PointToPointF(rightTopInner.Location));
+            desPoints.Add(CVHelper.PointToPointF(rightTopInner.Location));
             //右下
             var rightBottomArea = scanPaper.FixedPoint.RightBottom.Outer;
             var rightBottomBitmap = PictureBoxReadCard.Cut(this.OriginalBitmap, rightBottomArea);
             var rightBottomInner = common.GetBigRectFromBitmap(rightBottomBitmap, 2000, 6000, rightBottomArea.X, rightBottomArea.Y);
-            desPoints.Add(CommonUse.PointToPointF(rightBottomInner.Location));
+            desPoints.Add(CVHelper.PointToPointF(rightBottomInner.Location));
             //左下
             var leftBottomArea = scanPaper.FixedPoint.LeftBottom.Outer;
             var leftBottomBitmap = PictureBoxReadCard.Cut(this.OriginalBitmap, leftBottomArea);
             var leftBottomInner = common.GetBigRectFromBitmap(leftBottomBitmap, 2000, 6000, leftBottomArea.X, leftBottomArea.Y);
-            desPoints.Add(CommonUse.PointToPointF(leftBottomInner.Location));
+            desPoints.Add(CVHelper.PointToPointF(leftBottomInner.Location));
 
             //计算透视矩阵
             Mat data = CvInvoke.GetPerspectiveTransform(desPoints.ToArray(), srcPoints.ToArray());

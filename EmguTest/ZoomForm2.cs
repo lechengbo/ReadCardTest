@@ -128,7 +128,7 @@ namespace EmguTest
             Console.WriteLine(Form1.OrginalRectList.Count);
             //Form1.OrginalRectList.RemoveAt(0);
             //Form1.OrginalRectList.RemoveAt(Form1.OrginalRectList.Count - 1);
-            CommonUse common = new CommonUse();
+            CVHelper common = new CVHelper();
             var tempList= common.FillFull(Form1.OrginalRectList);
             //var tempList = Form1.OrginalRectList;
             this.picBox.RegionInfo= new RegionInfo(this.picBox.Image.Width, this.picBox.Image.Height, tempList);
@@ -142,13 +142,13 @@ namespace EmguTest
                 CvInvoke.Rectangle(matOrginal, Rectangle.Round(item), new MCvScalar(0, 0, 255));
 
             }
-            CommonUse commonUse = new CommonUse();
+            CVHelper commonUse = new CVHelper();
             commonUse.SaveMat(matOrginal, "获取裁剪图中的所有轮廓边在原始图中ZoomForm");
         }
 
         private void Btn_percentTest_Click(object sender, EventArgs e)
         {
-            CommonUse common = new CommonUse();
+            CVHelper common = new CVHelper();
 
             Rectangle r1 = new Rectangle(1, 1, 200, 200);
             Rectangle r2 = new Rectangle(2, 2, 190, 190);

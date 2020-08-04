@@ -30,7 +30,7 @@ namespace EmguTest
             this.picSrc.LoadImage(this.OriginalMat.Bitmap);
 
             //保存
-            new CommonUse().SaveMat(this.OriginalMat, "试卷结果暂时");
+            new CVHelper().SaveMat(this.OriginalMat, "试卷结果暂时");
 
         }
 

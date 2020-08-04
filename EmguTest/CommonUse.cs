@@ -18,18 +18,18 @@ using System.Windows.Forms;
 
 namespace EmguTest
 {
-    public class CommonUse
+    public class CVHelper
     {
         private Mat leftMat = new Image<Gray, byte>(Resources.left).Mat;
         private Mat rightMat = new Image<Gray, byte>(Resources.right).Mat;
         private Mat leftMatSmall = new Image<Gray, byte>(Resources.leftSmall).Mat;
         private Mat rightMatSmall = new Image<Gray, byte>(Resources.rightSmall).Mat;
 
-        public void SaveMat(Mat mat, string fileName, bool needFileExtension = true)
+        public void SaveMat(Mat mat, string fileName, bool needFileExtension = true,string dictory="")
         {
 #if DEBUG
 
-            string directoryPath = Application.StartupPath + "\\upload\\image\\";
+            string directoryPath = Application.StartupPath + "\\upload\\image\\"+dictory;
             if (!Directory.Exists(directoryPath))
             {
                 Directory.CreateDirectory(directoryPath);
@@ -42,7 +42,7 @@ namespace EmguTest
 #endif
 
         }
-        public void DrawRectCircleAndSave(Mat mat, List<Rectangle> rectangles, string fileName, int offsetX = 0, int offsetY = 0, List<Point> points = null)
+        public void DrawRectCircleAndSave(Mat mat, List<Rectangle> rectangles, string fileName, int offsetX = 0, int offsetY = 0, List<Point> points = null,string dictory="")
         {
 #if DEBUG
 
@@ -65,7 +65,7 @@ namespace EmguTest
                 }
             }
 
-            SaveMat(mat, fileName);
+            SaveMat(mat, fileName,dictory:dictory);
 #endif
         }
         /// <summary>
@@ -326,7 +326,8 @@ namespace EmguTest
                     }
                 }
 
-
+                //画出识别出的
+                //CvInvoke.DrawContours(mat, validContours, -1, new MCvScalar(0, 0, 255));
                 list = GetRectList(validContours);
                 //画出去掉重合的矩形框
                 SaveMat(mat, "原始");
@@ -381,6 +382,7 @@ namespace EmguTest
                 return originalRectList;
             }
         }
+        
         /// <summary>
         /// 获取矩形框从带有断开选项卡的图片中
         /// </summary>
@@ -767,14 +769,18 @@ namespace EmguTest
         public List<Point> GetCenterPointListFromBitmapByWhiteArea(Bitmap bitmap, List<CVArea> cVAreaList)
         {
             var src = new Image<Gray, byte>(bitmap);
-            cVAreaList.ForEach(a =>
+            for (int i = 0; i < cVAreaList.Count; i++)
             {
+                var a = cVAreaList[i];
+                a.SetName(i.ToString());
                 using (var copy = src.Copy(a.Area))
                 {
+                    
                     a.Recognition(copy);
 
                 }
-            });
+            }
+            
 
 
             List<Point> centerPointList = new List<Point>();
@@ -813,6 +819,94 @@ namespace EmguTest
                 });
 
             });
+
+            //分别保存涂答和未涂答图片
+            cVAreaList.ForEach(a =>
+            {
+                a.CVQuestionList.ForEach(que =>
+                {
+                    var actRect = que.GetRect(a.Area.Location);
+                    var negRect = que.GetRect(a.Area.Location,false);
+                    actRect.ForEach(rect =>
+                    {
+                        using (var copy = src.Copy(rect))
+                        {
+                            SaveMat(copy.Mat, "", true, "act\\");
+                        }
+                    });
+                    negRect.ForEach(rect =>
+                    {
+                        using (var copy = src.Copy(rect))
+                        {
+                            SaveMat(copy.Mat, "", true, "neg\\");
+                        }
+                    });
+                });
+
+            });
+
+            return centerPointList;
+        }
+
+        /// <summary>
+        /// 获取答案中心点，通过答题卡涂的面积大小来判断
+        /// </summary>
+        /// <param name="bitmap">原图或者，截后的图片</param>
+        /// <param name="cVAreaList">选项卡和区域矩形框，都是bitmap（0,0）的坐标</param>
+        /// <returns></returns>
+        public List<Point> GetCenterPointListFromBitmapByWhiteAreaByML(Bitmap bitmap, List<CVArea> cVAreaList)
+        {
+            var src = new Image<Gray, byte>(bitmap);
+            for (int i = 0; i < cVAreaList.Count; i++)
+            {
+                var a = cVAreaList[i];
+                a.SetName(i.ToString());
+                using (var copy = src.Copy(a.Area))
+                {
+
+                    a.RecognitionByML(copy);
+
+                }
+            }
+
+
+
+            List<Point> centerPointList = new List<Point>();
+            //List<Rectangle> rectList = new List<Rectangle>();
+            cVAreaList.ForEach(a =>
+            {
+                centerPointList.AddRange(a.GetResultPointList());
+                //rectList.AddRange(a.GetRectList());
+            });
+            //保存原图和识别的中心点结果
+            //SaveMat(src.Mat, "原图");
+            //DrawRectCircleAndSave(src.Mat, rectList, $"原图识别结果-智能识别", points: centerPointList);
+
+            //画出各种灰度的占比
+            //List<int> grayValueList = new List<int>() { 220, 230, 200, 180, 160, 100 };
+            //cVAreaList.ForEach(a =>
+            //{
+            //    //画出框和最终识别结果
+            //    List<Point> tempCenterPointList = new List<Point>();
+            //    List<Rectangle> tempRectList = new List<Rectangle>();
+            //    using (var copy = src.Copy(a.Area))
+            //    {
+            //        tempRectList.AddRange(a.GetRectList(false));
+
+            //        DrawRectCircleAndSave(copy.Mat, a.GetRectList(false), $"{a.Name}-最终识别结果", points: a.GetResultPointList(false));
+            //    }
+
+            //    //grayValueList.ForEach(grayValue =>
+            //    //{
+            //    //    using (var copy = src.Copy(a.Area))
+            //    //    {
+            //    //        a.DrawDetail(copy, grayValue, a.Name);
+
+            //    //    }
+
+            //    //});
+
+            //});
 
             return centerPointList;
         }
@@ -1549,6 +1643,17 @@ namespace EmguTest
 
             return mat_dilate;
         }
+        public static Image<Gray,byte> MyDilateS(Image<Gray,byte> iamge, MorphOp morphop = MorphOp.Dilate)
+        {
+            //1.膨胀，改善轮廓
+            Mat struct_element = CvInvoke.GetStructuringElement(Emgu.CV.CvEnum.ElementShape.Rectangle,
+                new Size(5, 5), new Point(2, 2));//结构元素
+            Mat mat_dilate = new Mat();
+            CvInvoke.MorphologyEx(iamge, mat_dilate, morphop, struct_element, new Point(-1, -1), 1,
+                Emgu.CV.CvEnum.BorderType.Default, new MCvScalar(255, 0, 0, 255));//形态学膨胀
+
+            return mat_dilate.ToImage<Gray,byte>();
+        }
 
         /// <summary>
         /// 筛选图中符合给定条件的轮廓
@@ -1899,6 +2004,16 @@ namespace EmguTest
             }
 
             return maxRect;
+        }
+
+        public static Mat Filter(Mat mat)
+        {
+            float[,] arr = new float[3, 3] { { 0, -1, 0 }, { -1,5, -1 }, { 0, -1, 0 } };
+            Matrix<float> kernel = new Matrix<float>(arr);
+
+            
+            CvInvoke.Filter2D(mat  , mat, kernel, new Point(-1, -1));
+            return mat;
         }
 
     }

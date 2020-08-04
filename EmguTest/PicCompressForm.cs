@@ -71,8 +71,8 @@ namespace EmguTest
             var newMat = new Mat();
             //CvInvoke.Resize(image, newMat, new Size(bitmap.Width, bitmap.Height));
             CvInvoke.CvtColor(image, newMat, ColorConversion.Bgr2Gray,1);
-            new CommonUse().SaveMat(image.Mat, "通过resize");
-            new CommonUse().SaveMat(newMat, "通过resize并灰度");
+            new CVHelper().SaveMat(image.Mat, "通过resize");
+            new CVHelper().SaveMat(newMat, "通过resize并灰度");
         }
 
         public void SaveBitmap(Bitmap bitmap,string fileName)

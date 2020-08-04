@@ -1,4 +1,5 @@
 ﻿using Emgu.CV;
+using Emgu.CV.CvEnum;
 using Emgu.CV.Features2D;
 using Emgu.CV.Structure;
 using Emgu.CV.Util;
@@ -17,6 +18,7 @@ namespace EmguTest
 {
     public partial class Form1 : Form
     {
+
         Point start; //画框的起始点
         Point end;//画框的结束点<br>
         bool blnDraw;//判断是否绘制<br>
@@ -27,6 +29,9 @@ namespace EmguTest
         public static List<Rectangle> CutedRectList { get; set; }
 
         private string fileName = "";
+
+        public MachineTrainBaseForm MachineTrainBaseForm { get; set; }
+        public CVArea CurrentArea { get; set; }
         public Form1()
         {
             InitializeComponent();
@@ -39,7 +44,7 @@ namespace EmguTest
 
         public void Start()
         {
-            CommonUse commonUse = new CommonUse();
+            CVHelper commonUse = new CVHelper();
             if (ib_original.Image != null)
             {
                 //Mat src = new Image<Bgr, byte>(ib_original.Image.Bitmap).Mat;
@@ -124,7 +129,7 @@ namespace EmguTest
 
         private void Btn_answerReg3_Click(object sender, EventArgs e)
         {
-            CommonUse commonUse = new CommonUse();
+            CVHelper commonUse = new CVHelper();
             var src = new Image<Gray, byte>(ib_middleCut.Image.Bitmap);
 
             var thresholdImage = src.CopyBlank();
@@ -166,7 +171,7 @@ namespace EmguTest
                 CvInvoke.Rectangle(src, r, new MCvScalar(0, 0, 255));
             });
 
-            new CommonUse().SaveMat(src.Mat, "通过比例计算获取的答案");
+            new CVHelper().SaveMat(src.Mat, "通过比例计算获取的答案");
             this.ib_result.Image = src;
 
 
@@ -200,7 +205,7 @@ namespace EmguTest
                 return;
             }
 
-            CommonUse commonUse = new CommonUse();
+            CVHelper commonUse = new CVHelper();
 
             Mat src = new Image<Bgr, byte>(ib_middleCut.Image.Bitmap).Mat;// new Mat();
 
@@ -289,7 +294,7 @@ namespace EmguTest
         {
             //this.Start();
 
-            CommonUse commonUse = new CommonUse();
+            CVHelper commonUse = new CVHelper();
             if (this.ib_middleCut.Image != null)
             {
 
@@ -401,7 +406,7 @@ namespace EmguTest
                 return;
             }
 
-            CommonUse commonUse = new CommonUse();
+            CVHelper commonUse = new CVHelper();
 
             var rectList = commonUse.GetRectListFromBitmap(this.ib_middleCut.Image.Bitmap,100,2000,0,0,true,1);
 
@@ -649,7 +654,7 @@ namespace EmguTest
                 return;
             }
 
-            CommonUse commonUse = new CommonUse();
+            CVHelper commonUse = new CVHelper();
 
             
             var centerList = commonUse.GetCenterPointListFromBitmap(this.ib_middleCut.Image.Bitmap,(int)this.num_threshold.Value);//300分辨率用200,150分辨率用45
@@ -670,9 +675,9 @@ namespace EmguTest
                 return;
             }
            
-            CommonUse commonUse = new CommonUse();
+            CVHelper commonUse = new CVHelper();
             var centerList = new List<Point>();
-            if (!this.ck_IsIntell.Checked)
+            if (!this.ck_IsIntell.Checked && !this.ckb_ANN.Checked)
             {
                 centerList = commonUse.GetCenterPointListFromBitmapByWhiteArea(this.ib_middleCut.Image.Bitmap, CutedRectList);
 
@@ -685,17 +690,27 @@ namespace EmguTest
                 this.ib_result.Image = tmpMat;
 
             }
-            else
+            else 
             {
                 var rectList = new List<Rectangle>();
                 CutedRectList.ForEach(r =>
                 {
                     
                     r.Offset(destRect.Location);
+                    //int offsetX = Math.Min(5, r.X), offsetY = Math.Min(5, r.Y);
+                    //r.Offset(-offsetX, -offsetY);
                     rectList.Add(r);
                 });
                 CVArea area = new CVArea(this.destRect, commonUse.OrderRectList(rectList, IsFillFull: false),name:"测试卷");
-                centerList = commonUse.GetCenterPointListFromBitmapByWhiteArea(this.ib_original.Image.Bitmap, new List<CVArea>() { area });
+                if (this.ck_IsIntell.Checked)
+                {
+                    centerList = commonUse.GetCenterPointListFromBitmapByWhiteArea(this.ib_original.Image.Bitmap, new List<CVArea>() { area });
+
+                }else if (this.ckb_ANN.Checked)
+                {
+                    centerList = commonUse.GetCenterPointListFromBitmapByWhiteAreaByML(this.ib_original.Image.Bitmap, new List<CVArea>() { area });
+
+                }
 
                 Mat tmpMat = new Image<Bgr, byte>(this.ib_original.Image.Bitmap).Mat;
                 centerList.ForEach(p =>
@@ -705,6 +720,7 @@ namespace EmguTest
 
                 this.ib_result.Image = tmpMat;
 
+                this.CurrentArea = area;
                 return;
             }
 
@@ -753,7 +769,7 @@ namespace EmguTest
                 return;
             }
 
-            CommonUse commonUse = new CommonUse();
+            CVHelper commonUse = new CVHelper();
 
             var rectList = commonUse.GetRectListFromBitmap(this.ib_middleCut.Image.Bitmap,40,600, isAutoFillFull: true,optimizeTimes:2,isBrokenOption:true);
 
@@ -812,7 +828,7 @@ namespace EmguTest
                 return;
             }
 
-            CommonUse commonUse = new CommonUse();
+            CVHelper commonUse = new CVHelper();
 
 
             var centerList = commonUse.GetCenterPointListFromBitmap(this.ib_original.Image.Bitmap, (int)this.num_threshold.Value);//300分辨率用200,150分辨率用45
@@ -837,6 +853,74 @@ namespace EmguTest
             form.Show();
 
                 
+        }
+
+        private void Btn_ruiHua_Click(object sender, EventArgs e)
+        {
+            if (this.ib_original.Image == null)
+            {
+                MessageBox.Show("裁剪图片不能为空");
+                return;
+            }
+            var bitmap = this.ib_middleCut.Image.Bitmap;
+            float[,] arr = new float[3, 3] { { 0, -1, 0 }, { -1,4, -1 }, { 0, -1, 0 } };
+            Matrix<float> kernel = new Matrix<float>(arr);
+
+            var image = new Image<Gray, byte>(bitmap).Mat;
+            var mat = new Mat(bitmap.Size,image.Depth,1);
+            CvInvoke.Filter2D(image, image, kernel, new Point(-1, -1));
+            //CvInvoke.Filter2D(image, image, kernel, new Point(-1, -1));
+            this.ib_result.Image = image;
+            
+        }
+
+        private void Bt_openMachineLearn_Click(object sender, EventArgs e)
+        {
+            this.MachineTrainBaseForm = new MachineTrainBaseForm();
+            this.MachineTrainBaseForm.Show();
+        }
+
+        private void Btn_joinTrainData_Click(object sender, EventArgs e)
+        {
+            if (this.MachineTrainBaseForm == null)
+            {
+                return;
+            }
+
+            this.CurrentArea.CVQuestionList.ForEach(q =>
+            {
+                for (int i = 0; i < q.OptionRectList.Count; i++)
+                {
+                    var rect = q.OptionRectList[i];
+                    if (q.Results.Contains(i))
+                    {
+                        this.MachineTrainBaseForm.PositiveSet.Add(rect);
+                    }
+                    else
+                    {
+                        if (this.MachineTrainBaseForm.NegativeSet.Count < this.MachineTrainBaseForm.PositiveSet.Count)
+                        {
+                            this.MachineTrainBaseForm.NegativeSet.Add(rect);
+
+                        }
+                    }
+                }
+            });
+
+            //this.MachineTrainBaseForm.NegativeSet.re
+            
+        }
+
+        private void Bt_openSobelForm_Click(object sender, EventArgs e)
+        {
+            SobelForm sobelForm = new SobelForm();
+            sobelForm.Show();
+        }
+
+        private void btnpicMul_Click(object sender, EventArgs e)
+        {
+            FormPicOperate form = new FormPicOperate();
+            form.Show();
         }
     }
 }

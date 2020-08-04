@@ -51,7 +51,7 @@ namespace EmguTest
                 return;
             }
 
-            CommonUse commonUse = new CommonUse();
+            CVHelper commonUse = new CVHelper();
             List<Rectangle> posRectList = new List<Rectangle>();
 
             for (int i = 0; i < this.picSrc.RegionInfo.RectList.Count; i++)
